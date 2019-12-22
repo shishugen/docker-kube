@@ -63,6 +63,15 @@ public class KubeApplyController extends BaseController {
 		model.addAttribute("kubeApply", kubeApply);
 		return "modules/kube/apply/kubeApplyList";
 	}
+	/**
+	 * 查询列表
+	 */
+	@RequiresPermissions("kube:apply:kubeApply:view")
+	@RequestMapping(value = {"oneList"})
+	public String oneList(KubeApply kubeApply, Model model) {
+		model.addAttribute("kubeApply", kubeApply);
+		return "modules/kube/apply/kubeApplyOneList";
+	}
 	
 	/**
 	 * 查询列表数据
@@ -72,6 +81,19 @@ public class KubeApplyController extends BaseController {
 	@ResponseBody
 	public Page<KubeApply> listData(KubeApply kubeApply, HttpServletRequest request, HttpServletResponse response) {
 		kubeApply.setPage(new Page<>(request, response));
+		kubeApply.setType("1");
+		Page<KubeApply> page = kubeApplyService.findPage(kubeApply);
+		return page;
+	}
+	/**
+	 * 查询列表数据
+	 */
+	@RequiresPermissions("kube:apply:kubeApply:view")
+	@RequestMapping(value = "oneListData")
+	@ResponseBody
+	public Page<KubeApply> oneListData(KubeApply kubeApply, HttpServletRequest request, HttpServletResponse response) {
+		kubeApply.setPage(new Page<>(request, response));
+		kubeApply.setType("2");
 		Page<KubeApply> page = kubeApplyService.findPage(kubeApply);
 		return page;
 	}

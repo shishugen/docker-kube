@@ -11,5 +11,15 @@
 		</where>
 		ORDER BY ${sqlMap.order.toSql()}
 	</select> -->
-	
+
+	<select id="findByStartDate" resultType="KubeApply">
+		SELECT ${sqlMap.column.toSql()}
+		FROM ${sqlMap.table.toSql()}
+		<where>
+			 a.start_date  &lt;= DATE_SUB(NOW(), INTERVAL 5 MINUTE) AND a.`status` = 0
+		</where>
+		ORDER BY ${sqlMap.order.toSql()}
+	</select>
+
+
 </mapper>

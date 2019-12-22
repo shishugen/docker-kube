@@ -26,6 +26,7 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
 		@Column(name = "id", attrName = "id", label = "编号", isPK = true),
 		@Column(name = "class_id", attrName = "classId", label = "班级ID"),
 		@Column(name = "course_id", attrName = "courseId", label = "课程ID"),
+		@Column(name = "user_id", attrName = "userId", label = "用户ID"),
 		@Column(name = "start_date", attrName = "startDate", label = "开始时间"),
 		@Column(name = "end_date", attrName = "endDate", label = "结束时间"),
 		@Column(name = "type", attrName = "type", label = "类型", comment = "类型(1:上课，2：个人)"),
@@ -48,6 +49,7 @@ public class KubeApply extends DataEntity<KubeApply> {
 	private static final long serialVersionUID = 1L;
 	private String classId;		// 班级ID
 	private String courseId;		// 课程ID
+	private String userId;		// 用户ID
 	private Date startDate;		// 开始时间
 	private Date endDate;		// 结束时间
 	private String type;		// 类型(1:上课，2：个人)
@@ -124,4 +126,49 @@ public class KubeApply extends DataEntity<KubeApply> {
 	public void setKubeClass(KubeClass kubeClass) {
 		this.kubeClass = kubeClass;
 	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public enum ApplyTyep{
+		CLASS_APPLY("班级预约", 1), ONE_APPLY("个人预约", 2);
+		private String name;
+		private int index;
+		// 构造方法
+		private ApplyTyep(String name, int index) {
+			this.name = name;
+			this.index = index;
+		}
+
+		@Override
+		public String toString() {
+			return this.index+"";
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public int getIndex() {
+			return index;
+		}
+
+		public void setIndex(int index) {
+			this.index = index;
+		}
+	}
+
+	public static void main(String[] args) {
+		System.out.println(ApplyTyep.CLASS_APPLY.index);
+	}
+
 }

@@ -3,8 +3,11 @@
  */
 package com.jeesite.modules.kube.service.apply;
 
+import java.util.Date;
 import java.util.List;
 
+import com.jeesite.modules.sys.entity.User;
+import com.jeesite.modules.sys.utils.UserUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +53,10 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 	@Override
 	@Transactional(readOnly=false)
 	public void save(KubeApply kubeApply) {
+		if ("2".equals(kubeApply.getType())){
+			kubeApply.setClassId("");
+			kubeApply.setUserId(UserUtils.getUser().getId());
+		}
 		super.save(kubeApply);
 	}
 	
@@ -72,5 +79,15 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 	public void delete(KubeApply kubeApply) {
 		super.delete(kubeApply);
 	}
-	
+
+	public void findByStartDate() {
+		KubeApply kubeApply = new KubeApply();
+		List<KubeApply> list = dao.findByStartDate(kubeApply);
+		list.forEach(System.out::print);
+		System.out.println(list);
+	}
+
+	public void findBydneDate() {
+
+	}
 }

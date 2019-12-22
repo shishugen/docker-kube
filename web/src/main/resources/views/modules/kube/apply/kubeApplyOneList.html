@@ -8,23 +8,18 @@
 			<div class="box-tools pull-right">
 				<a href="#" class="btn btn-default" id="btnSearch" title="${text('查询')}"><i class="fa fa-filter"></i> ${text('查询')}</a>
 				<% if(hasPermi('kube:apply:kubeApply:edit')){ %>
-					<a href="${ctx}/kube/apply/kubeApply/form?type=1" class="btn btn-default btnTool" title="${text('新增申请预约')}"><i class="fa fa-plus"></i> ${text('上课预约')}</a>
+					<a href="${ctx}/kube/apply/kubeApply/form?type=2" class="btn btn-default btnTool" title="${text('新增申请预约')}"><i class="fa fa-plus"></i> ${text('个人预约')}</a>
 				<% } %>
 			</div>
 		</div>
 		<div class="box-body">
-			<#form:form id="searchForm" model="${kubeApply}" action="${ctx}/kube/apply/kubeApply/listData" method="post" class="form-inline hide"
+			<#form:form id="searchForm" model="${kubeApply}" action="${ctx}/kube/apply/kubeApply/oneListData" method="post" class="form-inline hide"
 					data-page-no="${parameter.pageNo}" data-page-size="${parameter.pageSize}" data-order-by="${parameter.orderBy}">
-			    <#form:hidden path="type" value="1"/>
-				<div class="form-group">
-					<label class="control-label">${text('班级')}：</label>
-					<div class="control-inline">
-						<#form:input path="classId" maxlength="64" class="form-control width-120"/>
-					</div>
-				</div>
+
 				<div class="form-group">
 					<label class="control-label">${text('课程')}：</label>
 					<div class="control-inline">
+						<#form:hidden path="type" value="2"/>
 						<#form:input path="courseId" maxlength="64" class="form-control width-120"/>
 					</div>
 				</div>
@@ -64,10 +59,9 @@
 $('#dataGrid').dataGrid({
 	searchForm: $("#searchForm"),
 	columnModel: [
-		{header:'${text("班级名")}', name:'kubeClass.className', index:'c2.class_name', width:150, align:"left", frozen:true, formatter: function(val, obj, row, act){
-			return '<a href="${ctx}/kube/apply/kubeApply/form?id='+row.id+'" class="btnList" data-title="${text("编辑申请预约")}">'+(val||row.id)+'</a>';
-		}},
-		{header:'${text("课程名")}', name:'kubeCourse.courseName', index:'c1.course_name', width:150, align:"left"},
+		{header:'${text("课程名")}', name:'kubeCourse.courseName', index:'c1.course_name', width:150, align:"left", frozen:true, formatter: function(val, obj, row, act){
+                return '<a href="${ctx}/kube/apply/kubeApply/form?id='+row.id+'" class="btnList" data-title="${text("编辑申请预约")}">'+(val||row.id)+'</a>';
+            }},
 		{header:'${text("开始时间")}', name:'startDate', index:'a.start_date', width:150, align:"center"},
 		{header:'${text("结束时间")}', name:'endDate', index:'a.end_date', width:150, align:"center"},
 		{header:'${text("类型")}', name:'type', index:'a.type', width:150, align:"center", formatter: function(val, obj, row, act){
@@ -92,4 +86,5 @@ $('#dataGrid').dataGrid({
 
 	}
 });
+
 </script>
