@@ -23,6 +23,7 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
 @Table(name="kube_images", alias="a", columns={
 		@Column(name="id", attrName="id", label="编号", isPK=true),
 		@Column(name="image_id", attrName="imageId", label="镜像ID", isQuery=false),
+		@Column(name="image_name", attrName="imageName", label="镜像自定义名", isQuery=false),
 		@Column(name="repository_name", attrName="repositoryName", label="仓库名", queryType=QueryType.LIKE),
 		@Column(name="tag", attrName="tag", label="版本"),
 		@Column(name="size", attrName="size", label="大小M", isQuery=false),
@@ -34,6 +35,7 @@ public class KubeImages extends DataEntity<KubeImages> {
 	
 	private static final long serialVersionUID = 1L;
 	private String imageId;		// 镜像ID
+	private String imageName;		// 镜像自定义名
 	private String repositoryName;		// 仓库名
 	private String tag;		// 版本
 	private Long size;		// 大小M
@@ -58,7 +60,17 @@ public class KubeImages extends DataEntity<KubeImages> {
 	public void setImageId(String imageId) {
 		this.imageId = imageId;
 	}
-	
+
+	@NotBlank(message="镜像名不能为空")
+	@Length(min=0, max=64, message="镜像名长度不能超过 120 个字符")
+	public String getImageName() {
+		return imageName;
+	}
+
+	public void setImageName(String imageName) {
+		this.imageName = imageName;
+	}
+
 	//otBlank(message="仓库名不能为空")
 	@Length(min=0, max=200, message="仓库名长度不能超过 200 个字符")
 	public String getRepositoryName() {
