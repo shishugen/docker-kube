@@ -51,10 +51,7 @@ public class CreateVmThread extends  Thread{
     public static Map<String,String> syncVmMap = new ConcurrentHashMap<>();
     @Override
     public void run() {
-
         KubernetesClient kubeclinet = Kubeclinet.getKubeclinet();
-         AtomicBoolean flag = new AtomicBoolean(true);
-        while (flag.get()){
             synchronized (this){
                 try {
                     String deploymentName = UUID.randomUUID().toString().replaceAll("-", "");
@@ -114,7 +111,5 @@ public class CreateVmThread extends  Thread{
                     return;
                 }
             }
-        }
     }
-
 }
