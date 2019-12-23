@@ -24,6 +24,8 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
 		@Column(name="id", attrName="id", label="编号", isPK=true),
 		@Column(name="image_id", attrName="imageId", label="镜像ID", isQuery=false),
 		@Column(name="image_name", attrName="imageName", label="镜像自定义名", isQuery=false),
+		@Column(name="cpu", attrName="cpu", label="cpu单位(G)", isQuery=false),
+		@Column(name="memory", attrName="memory", label="memory单位(G)", isQuery=false),
 		@Column(name="repository_name", attrName="repositoryName", label="仓库名", queryType=QueryType.LIKE),
 		@Column(name="tag", attrName="tag", label="版本"),
 		@Column(name="size", attrName="size", label="大小M", isQuery=false),
@@ -36,6 +38,8 @@ public class KubeImages extends DataEntity<KubeImages> {
 	private static final long serialVersionUID = 1L;
 	private String imageId;		// 镜像ID
 	private String imageName;		// 镜像自定义名
+	private String cpu;		// CPU单位(G)
+	private String memory;		// memory单位(G)
 	private String repositoryName;		// 仓库名
 	private String tag;		// 版本
 	private Long size;		// 大小M
@@ -114,5 +118,21 @@ public class KubeImages extends DataEntity<KubeImages> {
 
 	public void setKubeImages(KubeImages kubeImages) {
 		this.kubeImages = kubeImages;
+	}
+
+	public String getCpu() {
+		return cpu;
+	}
+
+	public void setCpu(String cpu) {
+		this.cpu = cpu;
+	}
+
+	public String getMemory() {
+		return memory;
+	}
+
+	public void setMemory(String memory) {
+		this.memory = memory;
 	}
 }

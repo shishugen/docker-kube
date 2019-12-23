@@ -3,6 +3,7 @@ package com.jeesite.modules.kube.work;
 import com.jeesite.modules.kube.core.Kubeclinet;
 import com.jeesite.modules.kube.entity.vm.KubeVm;
 import com.jeesite.modules.kube.service.vm.KubeVmService;
+import com.jeesite.modules.kube.utlis.SpringUtil;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodStatus;
@@ -24,13 +25,14 @@ import java.util.stream.Collectors;
 @Component
 public class SyncCreateVmThread  extends  Thread{
 
-    @Autowired
+
     private KubeVmService kubeVmService;
 
     //kay:deployment name   value : images_id
     public static Map<String,String> syncVmMap = new ConcurrentHashMap<>();
     @Override
     public void run() {
+        kubeVmService = SpringUtil.getBean(KubeVmService.class);
         KubernetesClient kubeclinet = Kubeclinet.getKubeclinet();
          AtomicBoolean flag = new AtomicBoolean(true);
         while (flag.get()){
@@ -42,7 +44,8 @@ public class SyncCreateVmThread  extends  Thread{
                             String deploymentName = split[0];
                             String namespace = split[1];
                             List<Pod> items = kubeclinet.pods().inNamespace(namespace).list().getItems();
-                            List<Pod> collect = items.stream().filter((a -> a.getMetadata().getName().indexOf(deploymentName) != -1)).collect(Collectors.toList());
+                            List<Pod> collect = items.stream().filter((a -> a.getMetadata().getName().indexOf(deploymentName) != -1 &&
+                                    KubeVm.VM_STATUS_RUNNING.equals(a.getStatus().getPhase()))).collect(Collectors.toList());
                             collect.parallelStream().forEach((vm) -> {
                                 ObjectMeta metadata = vm.getMetadata();
                                 PodStatus status = vm.getStatus();
@@ -50,9 +53,12 @@ public class SyncCreateVmThread  extends  Thread{
                                 kubeVm.setVmName(metadata.getName());
                                 kubeVm.setVmIp(status.getPodIP());
                                 kubeVm.setHostIp(status.getHostIP());
+                                kubeVm.setVmStatus("0");
+                                kubeVm.setDeploymentName(deploymentName);
+                                kubeVm.setNamespace(namespace);
                                // kubeVm.setVmStartDate(new Date(status.getStartTime()));
                                 kubeVm.setImagesId(imagesId);
-                               // kubeVmService.save(kubeVm);
+                                kubeVmService.save(kubeVm);
                             });
                             long count = collect.stream().filter((b -> !KubeVm.VM_STATUS_RUNNING.equals(b.getStatus().getPhase()))).count();
                             if (count != 0){
@@ -60,6 +66,7 @@ public class SyncCreateVmThread  extends  Thread{
                                     Thread.sleep(60000L);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
+                                    flag.set(false);
                                     return;
                                 }
                             }else {
@@ -67,7 +74,6 @@ public class SyncCreateVmThread  extends  Thread{
                             }
                         });
                     }
-                    return;
                 } catch (Exception e) {
                     e.printStackTrace();
                     return;

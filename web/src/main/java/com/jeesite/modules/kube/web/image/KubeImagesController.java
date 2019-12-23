@@ -119,6 +119,8 @@ public class KubeImagesController extends BaseController {
 		List<KubeImages> list = kubeImageCache.get(KUBE_IMAGE_KEY);
 		KubeImages any = list.stream().filter(a -> a.getRepositoryName().equals(kubeImages.getRepositoryName())).findAny().get();
 		any.setImageName(kubeImages.getImageName());
+		any.setCpu(kubeImages.getCpu());
+		any.setMemory(kubeImages.getMemory());
 		kubeImagesService.save(any);
 		return renderResult(Global.TRUE, text("保存本地镜像成功！"));
 	}

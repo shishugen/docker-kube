@@ -91,16 +91,17 @@ public class KubeVmController extends BaseController {
 	@PostMapping(value = "save")
 	@ResponseBody
 	public String save(@Validated KubeVm kubeVm) {
-/*		Deployment deployment = createDeployment(3, "1", "2");
+		Deployment deployment = createDeployment(1, "1", "1");
 		ObjectMeta metadata = deployment.getMetadata();
 		String deploymentName = metadata.getName();
 		String namespace = metadata.getNamespace();
 
 		kubeVm.setDeploymentName(deploymentName);
-		kubeVm.setNamespace(namespace);*/
+		kubeVm.setNamespace(namespace);
 		//kubeVmService.save(kubeVm);
 		SyncCreateVmThread syncCreateVmThread = new SyncCreateVmThread();
-		SyncCreateVmThread.syncVmMap.put("218dedd61bf5401db33a797fcffd9246__"+DEFAULT_NAMESPACE,"imageId");
+		//SyncCreateVmThread.syncVmMap.put(deploymentName+"__"+DEFAULT_NAMESPACE,"imageId");
+		SyncCreateVmThread.syncVmMap.put("c2870fdd38ee4ae8bef8331e521f54d1"+"__"+DEFAULT_NAMESPACE,"imageId");
 		syncCreateVmThread.start();
 
 

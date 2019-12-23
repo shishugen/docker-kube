@@ -29,7 +29,7 @@ public class KubeScheduler {
     @Scheduled(cron="0 */1 * * * ?")
     public void courseDown(){
         System.out.println("1111111111111111111222222222");
-        kubeApplyService.findBydneDate();
+      //  kubeApplyService.findBydneDate();
 
     }
 }

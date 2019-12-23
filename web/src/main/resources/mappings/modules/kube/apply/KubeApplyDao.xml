@@ -15,8 +15,12 @@
 	<select id="findByStartDate" resultType="KubeApply">
 		SELECT ${sqlMap.column.toSql()}
 		FROM ${sqlMap.table.toSql()}
+		LEFT JOIN kube_vm_log AS vm
+		ON  vm.apply_id = a.id
 		<where>
-			 a.start_date  &lt;= DATE_SUB(NOW(), INTERVAL 5 MINUTE) AND a.`status` = 0
+			 a.start_date BETWEEN DATE_ADD(NOW(), INTERVAL - 5 MINUTE) AND NOW()
+			 AND a.`status` = 0
+			 AND  vm.apply_id is null
 		</where>
 		ORDER BY ${sqlMap.order.toSql()}
 	</select>

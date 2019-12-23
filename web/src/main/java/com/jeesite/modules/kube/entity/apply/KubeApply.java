@@ -5,6 +5,8 @@ package com.jeesite.modules.kube.entity.apply;
 
 import com.jeesite.modules.kube.entity.clazz.KubeClass;
 import com.jeesite.modules.kube.entity.course.KubeCourse;
+import com.jeesite.modules.kube.entity.courseimages.KubeCourseImages;
+import com.jeesite.modules.kube.entity.image.KubeImages;
 import com.jeesite.modules.sys.entity.User;
 import org.hibernate.validator.constraints.Length;
 import java.util.Date;
@@ -41,7 +43,17 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
 						@Column(name="class_name", label="班名称", isQuery=false)
 				}
 		),
-
+		@JoinTable(type=Type.LEFT_JOIN, entity= KubeCourseImages.class, attrName="kubeCourseImages", alias="c3",
+						on="c3.course_id = c1.id", columns={
+				}
+		),
+		@JoinTable(type=Type.LEFT_JOIN, entity= KubeImages.class, attrName="kubeImages", alias="c4",
+						on="c3.images_id = c4.id", columns={
+				@Column(name="cpu", attrName="cpu", label="cpu单位(G)", isQuery=false),
+				@Column(name="memory", attrName="memory", label="memory单位(G)", isQuery=false),
+				@Column(name="repository_name", attrName="repositoryName", label="仓库名", queryType=QueryType.LIKE),
+				}
+		),
 	}, orderBy="a.update_date DESC"
 )
 public class KubeApply extends DataEntity<KubeApply> {
@@ -55,6 +67,8 @@ public class KubeApply extends DataEntity<KubeApply> {
 	private String type;		// 类型(1:上课，2：个人)
 	private KubeCourse kubeCourse;
 	private KubeClass kubeClass;
+	private KubeCourseImages kubeCourseImages;
+	private KubeImages kubeImages;
 
 
 	
@@ -135,6 +149,22 @@ public class KubeApply extends DataEntity<KubeApply> {
 		this.userId = userId;
 	}
 
+	public KubeCourseImages getKubeCourseImages() {
+		return kubeCourseImages;
+	}
+
+	public void setKubeCourseImages(KubeCourseImages kubeCourseImages) {
+		this.kubeCourseImages = kubeCourseImages;
+	}
+
+	public KubeImages getKubeImages() {
+		return kubeImages;
+	}
+
+	public void setKubeImages(KubeImages kubeImages) {
+		this.kubeImages = kubeImages;
+	}
+
 	public enum ApplyTyep{
 		CLASS_APPLY("班级预约", 1), ONE_APPLY("个人预约", 2);
 		private String name;
@@ -167,8 +197,6 @@ public class KubeApply extends DataEntity<KubeApply> {
 		}
 	}
 
-	public static void main(String[] args) {
-		System.out.println(ApplyTyep.CLASS_APPLY.index);
-	}
+
 
 }

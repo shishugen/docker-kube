@@ -109,6 +109,7 @@ public class KubeApplyController extends BaseController {
 		model.addAttribute("classList", classList);
 		model.addAttribute("kubeApply", kubeApply);
 		model.addAttribute("courseList", courseList);
+		System.out.println("333333332金金qqqqqqqqqqqqqqq");
 		return "modules/kube/apply/kubeApplyForm";
 	}
 
