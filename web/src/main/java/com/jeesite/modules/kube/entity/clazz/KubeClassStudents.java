@@ -39,7 +39,8 @@ public class KubeClassStudents extends DataEntity<KubeClassStudents> {
 	private static final long serialVersionUID = 1L;
 	private KubeClass classId;		// 班级ID 父类
 	private User userId;		// 用户ID
-	
+	private String applyId;		// applyIdID
+
 	public KubeClassStudents() {
 		this(null);
 	}
@@ -67,5 +68,12 @@ public class KubeClassStudents extends DataEntity<KubeClassStudents> {
 	public void setUserId(User userId) {
 		this.userId = userId;
 	}
-	
+
+	public String getApplyId() {
+		return applyId;
+	}
+
+	public void setApplyId(String applyId) {
+		this.applyId = applyId;
+	}
 }

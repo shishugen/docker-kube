@@ -10,6 +10,7 @@ import com.jeesite.modules.kube.entity.clazz.KubeClass;
 import com.jeesite.modules.kube.entity.course.KubeCourse;
 import com.jeesite.modules.kube.service.clazz.KubeClassService;
 import com.jeesite.modules.kube.service.course.KubeCourseService;
+import com.jeesite.modules.sys.utils.UserUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -81,7 +82,7 @@ public class KubeApplyController extends BaseController {
 	@ResponseBody
 	public Page<KubeApply> listData(KubeApply kubeApply, HttpServletRequest request, HttpServletResponse response) {
 		kubeApply.setPage(new Page<>(request, response));
-		kubeApply.setType("1");
+		kubeApply.setType(KubeApply.ApplyTyep.CLASS_APPLY.ordinal());
 		Page<KubeApply> page = kubeApplyService.findPage(kubeApply);
 		return page;
 	}
@@ -93,7 +94,7 @@ public class KubeApplyController extends BaseController {
 	@ResponseBody
 	public Page<KubeApply> oneListData(KubeApply kubeApply, HttpServletRequest request, HttpServletResponse response) {
 		kubeApply.setPage(new Page<>(request, response));
-		kubeApply.setType("2");
+		kubeApply.setType(KubeApply.ApplyTyep.ONE_APPLY.ordinal());
 		Page<KubeApply> page = kubeApplyService.findPage(kubeApply);
 		return page;
 	}
@@ -109,8 +110,19 @@ public class KubeApplyController extends BaseController {
 		model.addAttribute("classList", classList);
 		model.addAttribute("kubeApply", kubeApply);
 		model.addAttribute("courseList", courseList);
-		System.out.println("333333332金金qqqqqqqqqqqqqqq");
 		return "modules/kube/apply/kubeApplyForm";
+	}
+
+	/**
+	 * 查看编辑表单
+	 */
+	@RequiresPermissions("kube:apply:kubeApply:view")
+	@RequestMapping(value = "oneForm")
+	public String oneForm(KubeApply kubeApply, Model model) {
+		List<KubeCourse> courseList = kubeCourseService.findList(new KubeCourse());
+		model.addAttribute("kubeApply", kubeApply);
+		model.addAttribute("courseList", courseList);
+		return "modules/kube/apply/kubeApplyOneForm";
 	}
 
 	/**
@@ -120,10 +132,23 @@ public class KubeApplyController extends BaseController {
 	@PostMapping(value = "save")
 	@ResponseBody
 	public String save(@Validated KubeApply kubeApply) {
+		kubeApply.setType(KubeApply.ApplyTyep.CLASS_APPLY.ordinal());
 		kubeApplyService.save(kubeApply);
 		return renderResult(Global.TRUE, text("保存申请预约成功！"));
 	}
-	
+
+		/**
+	 * 保存申请预约
+	 */
+	@RequiresPermissions("kube:apply:kubeApply:edit")
+	@PostMapping(value = "oneSave")
+	@ResponseBody
+	public String oneSave(@Validated KubeApply kubeApply) {
+		kubeApply.setType(KubeApply.ApplyTyep.ONE_APPLY.ordinal());
+		kubeApplyService.save(kubeApply);
+		return renderResult(Global.TRUE, text("保存申请预约成功！"));
+	}
+
 	/**
 	 * 删除申请预约
 	 */

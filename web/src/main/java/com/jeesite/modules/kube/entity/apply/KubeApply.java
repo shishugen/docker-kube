@@ -31,7 +31,7 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
 		@Column(name = "user_id", attrName = "userId", label = "用户ID"),
 		@Column(name = "start_date", attrName = "startDate", label = "开始时间"),
 		@Column(name = "end_date", attrName = "endDate", label = "结束时间"),
-		@Column(name = "type", attrName = "type", label = "类型", comment = "类型(1:上课，2：个人)"),
+		@Column(name = "type", attrName = "type", label = "类型", comment = "类型(0:上课，1：个人)"),
 		@Column(includeEntity = DataEntity.class),
 },joinTable={
 		@JoinTable(type=Type.LEFT_JOIN, entity=KubeCourse.class, attrName="kubeCourse", alias="c1",
@@ -64,7 +64,7 @@ public class KubeApply extends DataEntity<KubeApply> {
 	private String userId;		// 用户ID
 	private Date startDate;		// 开始时间
 	private Date endDate;		// 结束时间
-	private String type;		// 类型(1:上课，2：个人)
+	private Integer type;		// 类型(0:上课，1：个人)
 	private KubeCourse kubeCourse;
 	private KubeClass kubeClass;
 	private KubeCourseImages kubeCourseImages;
@@ -115,13 +115,12 @@ public class KubeApply extends DataEntity<KubeApply> {
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
-	
-	@Length(min=0, max=1, message="类型长度不能超过 1 个字符")
-	public String getType() {
+
+	public Integer getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(Integer type) {
 		this.type = type;
 	}
 
@@ -166,35 +165,7 @@ public class KubeApply extends DataEntity<KubeApply> {
 	}
 
 	public enum ApplyTyep{
-		CLASS_APPLY("班级预约", 1), ONE_APPLY("个人预约", 2);
-		private String name;
-		private int index;
-		// 构造方法
-		private ApplyTyep(String name, int index) {
-			this.name = name;
-			this.index = index;
-		}
-
-		@Override
-		public String toString() {
-			return this.index+"";
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public int getIndex() {
-			return index;
-		}
-
-		public void setIndex(int index) {
-			this.index = index;
-		}
+		CLASS_APPLY, ONE_APPLY;
 	}
 
 

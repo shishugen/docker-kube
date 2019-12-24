@@ -31,6 +31,7 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
 		@Column(name="images_id", attrName="imagesId", label="镜像表ID", isQuery=false),
 		@Column(name="user_id", attrName="userId.userCode", label="用户"),
 		@Column(name="vm_start_date", attrName="vmStartDate", label="虚拟机启动时间"),
+		@Column(name="apply_id", attrName="applyId", label="申请ID"),
 		@Column(includeEntity=DataEntity.class),
 	}, joinTable={
 
@@ -50,7 +51,7 @@ public class KubeVm extends DataEntity<KubeVm> {
 	
 	private static final long serialVersionUID = 1L;
 	private String vmName;		// 虚拟机名称
-	private String vmStatus;		// 虚拟机状态
+	private Integer vmStatus;		// 虚拟机状态
 	private String vmIp;		// 虚拟机IP
 	private String hostIp;		// 虚拟机服务器IP
 	private String namespace;		// 命名空间
@@ -58,6 +59,7 @@ public class KubeVm extends DataEntity<KubeVm> {
 	private String imagesId;		// 镜像表ID
 	private User userId;		// 用户
 	private Date vmStartDate;		// 虚拟机启动时间
+	private String applyId;
 	
 	public KubeVm(String deploymentName, String namespace) {
 		this.deploymentName =deploymentName;
@@ -82,11 +84,11 @@ public class KubeVm extends DataEntity<KubeVm> {
 	}
 	
 	@Length(min=0, max=1, message="虚拟机状态长度不能超过 1 个字符")
-	public String getVmStatus() {
+	public Integer getVmStatus() {
 		return vmStatus;
 	}
 
-	public void setVmStatus(String vmStatus) {
+	public void setVmStatus(Integer vmStatus) {
 		this.vmStatus = vmStatus;
 	}
 	
@@ -151,5 +153,12 @@ public class KubeVm extends DataEntity<KubeVm> {
 	public void setVmStartDate(Date vmStartDate) {
 		this.vmStartDate = vmStartDate;
 	}
-	
+
+	public String getApplyId() {
+		return applyId;
+	}
+
+	public void setApplyId(String applyId) {
+		this.applyId = applyId;
+	}
 }

@@ -1,9 +1,6 @@
 package com.jeesite.modules.kube.work;
 
-import com.jeesite.modules.kube.core.Kubeclinet;
-import com.jeesite.modules.kube.entity.vm.KubeVm;
-import com.jeesite.modules.kube.service.vm.KubeVmService;
-import com.jeesite.modules.kube.utlis.SpringUtil;
+import com.jeesite.modules.kube.core.KubeClinet;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentSpec;
@@ -12,25 +9,29 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
 /**
  * @ClassName SyncCreateVmThread
  * @Desctiption : TODO
  * @Author ssg
  * @Date 2019/12/23 15:01
  */
-@Component
 public class CreateVmThread extends  Thread{
 
     private String cpu;
     private String memory;
     private String imagesName;
     private Integer number;
+    private String applyId;
 
     public CreateVmThread(){ }
 
+    public CreateVmThread(String cpu, String memory, String imagesName, Integer number,String applyId) {
+        this.cpu = cpu;
+        this.memory = memory;
+        this.imagesName = imagesName;
+        this.number = number;
+        this.applyId = applyId;
+    }
     public CreateVmThread(String cpu, String memory, String imagesName, Integer number) {
         this.cpu = cpu;
         this.memory = memory;
@@ -51,7 +52,7 @@ public class CreateVmThread extends  Thread{
     public static Map<String,String> syncVmMap = new ConcurrentHashMap<>();
     @Override
     public void run() {
-        KubernetesClient kubeclinet = Kubeclinet.getKubeclinet();
+        KubernetesClient kubeclinet = KubeClinet.getKubeclinet();
             synchronized (this){
                 try {
                     String deploymentName = UUID.randomUUID().toString().replaceAll("-", "");
@@ -101,11 +102,13 @@ public class CreateVmThread extends  Thread{
                     containerList.add(container);
                     spec.setContainers(containerList);
                     template.setSpec(spec);
-
                     deploymentSpec.setTemplate(template);
                     deployment.setSpec(deploymentSpec);
                     Deployment backData = kubeclinet.apps().deployments().inNamespace(DEFAULT_NAMESPACE).create(deployment);
-                    SyncCreateVmThread.syncVmMap.put(deploymentName+"__"+DEFAULT_NAMESPACE,imagesName);
+                    System.out.println("backData=="+backData);
+                    SyncCreateVmThread.syncVmMap.put(backData.getMetadata().getName()+"__"+backData.getMetadata().getNamespace(),imagesName);
+                    System.out.println("backData111=="+backData);
+                    new SyncCreateVmThread(applyId).start();
                 } catch (Exception e) {
                     e.printStackTrace();
                     return;

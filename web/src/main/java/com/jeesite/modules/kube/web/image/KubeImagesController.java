@@ -85,7 +85,8 @@ public class KubeImagesController extends BaseController {
 	public String form(KubeImages kubeImages, Model model) {
 		DockerClient dockerClient = DockerClinet.getDockerClient();
 		List<Image> imageList = dockerClient.listImagesCmd().exec();
-		List<List<KubeImages>> collect = imageList.stream().filter((Image a) -> a.getRepoTags().length > 0).map(a -> {
+		List<List<KubeImages>> collect = imageList.stream().filter((Image a) ->a.getRepoTags() != null &&
+				a.getRepoTags().length > 0).map(a -> {
 			List<KubeImages> collect1 = Arrays.stream(a.getRepoTags()).filter(b->!b.equals("<none>:<none>")).map(b -> {
 						 KubeImages kubeImage = new KubeImages();
 				         kubeImage.setRepositoryName(b);

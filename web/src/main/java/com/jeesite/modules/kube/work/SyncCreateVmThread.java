@@ -1,6 +1,6 @@
 package com.jeesite.modules.kube.work;
 
-import com.jeesite.modules.kube.core.Kubeclinet;
+import com.jeesite.modules.kube.core.KubeClinet;
 import com.jeesite.modules.kube.entity.vm.KubeVm;
 import com.jeesite.modules.kube.service.vm.KubeVmService;
 import com.jeesite.modules.kube.utlis.SpringUtil;
@@ -22,9 +22,13 @@ import java.util.stream.Collectors;
  * @Author ssg
  * @Date 2019/12/23 15:01
  */
-@Component
 public class SyncCreateVmThread  extends  Thread{
 
+    private String applyId;
+
+    public SyncCreateVmThread(String applyId) {
+        this.applyId = applyId;
+    }
 
     private KubeVmService kubeVmService;
 
@@ -33,8 +37,8 @@ public class SyncCreateVmThread  extends  Thread{
     @Override
     public void run() {
         kubeVmService = SpringUtil.getBean(KubeVmService.class);
-        KubernetesClient kubeclinet = Kubeclinet.getKubeclinet();
-         AtomicBoolean flag = new AtomicBoolean(true);
+        KubernetesClient kubeclinet = KubeClinet.getKubeclinet();
+        AtomicBoolean flag = new AtomicBoolean(true);
         while (flag.get()){
             synchronized (this){
                 try {
@@ -44,8 +48,10 @@ public class SyncCreateVmThread  extends  Thread{
                             String deploymentName = split[0];
                             String namespace = split[1];
                             List<Pod> items = kubeclinet.pods().inNamespace(namespace).list().getItems();
+                            System.out.println(deploymentName+"---deploymentName-----"+namespace+"----items="+items.size());
                             List<Pod> collect = items.stream().filter((a -> a.getMetadata().getName().indexOf(deploymentName) != -1 &&
                                     KubeVm.VM_STATUS_RUNNING.equals(a.getStatus().getPhase()))).collect(Collectors.toList());
+                            System.out.println("collect创建数量"+collect.size());
                             collect.parallelStream().forEach((vm) -> {
                                 ObjectMeta metadata = vm.getMetadata();
                                 PodStatus status = vm.getStatus();
@@ -53,24 +59,40 @@ public class SyncCreateVmThread  extends  Thread{
                                 kubeVm.setVmName(metadata.getName());
                                 kubeVm.setVmIp(status.getPodIP());
                                 kubeVm.setHostIp(status.getHostIP());
-                                kubeVm.setVmStatus("0");
+                                kubeVm.setVmStatus(KubeVm.VmStatus.Running.ordinal());
                                 kubeVm.setDeploymentName(deploymentName);
                                 kubeVm.setNamespace(namespace);
+                                kubeVm.setApplyId(applyId);
                                // kubeVm.setVmStartDate(new Date(status.getStartTime()));
                                 kubeVm.setImagesId(imagesId);
                                 kubeVmService.save(kubeVm);
+                                System.out.println("保存虚拟机");
                             });
-                            long count = collect.stream().filter((b -> !KubeVm.VM_STATUS_RUNNING.equals(b.getStatus().getPhase()))).count();
-                            if (count != 0){
+                            if(collect.size() == 0){
                                 try {
                                     Thread.sleep(60000L);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                     flag.set(false);
+                                    System.out.println("同步-----虚拟机异常退出===");
                                     return;
                                 }
-                            }else {
-                                flag.set(false);
+                            }else{
+                                long count = collect.stream().filter((b -> !KubeVm.VM_STATUS_RUNNING.equals(b.getStatus().getPhase()))).count();
+                                System.out.println("同步-----虚拟机==="+count);
+                                if (count != 0){
+                                    try {
+                                        Thread.sleep(60000L);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                        flag.set(false);
+                                        System.out.println("同步-----虚拟机异常退出==="+count);
+                                        return;
+                                    }
+                                }else {
+                                    flag.set(false);
+                                    System.out.println("同步-----虚拟机完成退出==="+count);
+                                }
                             }
                         });
                     }

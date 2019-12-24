@@ -72,5 +72,8 @@ public class KubeVmService extends CrudService<KubeVmDao, KubeVm> {
 	public void delete(KubeVm kubeVm) {
 		super.delete(kubeVm);
 	}
-	
+
+    public List<KubeVm> findApplyIdNotBind(KubeVm kubeVm) {
+		return dao.findApplyIdNotBind(kubeVm);
+    }
 }

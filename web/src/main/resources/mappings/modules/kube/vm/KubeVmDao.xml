@@ -11,5 +11,14 @@
 		</where>
 		ORDER BY ${sqlMap.order.toSql()}
 	</select> -->
-	
+
+	<select id="findApplyIdNotBind" resultType="KubeVm">
+		SELECT ${sqlMap.column.toSql()}
+		FROM  ${sqlMap.table.toSql()}
+		<where>
+				a.`apply_id` = #{applyId}
+			AND a.`user_id` IS NULL
+			AND a.status = 0
+		</where>
+	</select>
 </mapper>

@@ -6,6 +6,9 @@ package com.jeesite.modules.kube.dao.clazz;
 import com.jeesite.common.dao.CrudDao;
 import com.jeesite.common.mybatis.annotation.MyBatisDao;
 import com.jeesite.modules.kube.entity.clazz.KubeClassStudents;
+import com.jeesite.modules.kube.entity.vm.KubeVm;
+
+import java.util.List;
 
 /**
  * 班级DAO接口
@@ -14,5 +17,6 @@ import com.jeesite.modules.kube.entity.clazz.KubeClassStudents;
  */
 @MyBatisDao
 public interface KubeClassStudentsDao extends CrudDao<KubeClassStudents> {
-	
+
+    List<KubeClassStudents> findApplyIdNotBind(KubeClassStudents kubeClassStudents);
 }

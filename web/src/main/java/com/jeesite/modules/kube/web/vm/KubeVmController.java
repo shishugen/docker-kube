@@ -6,7 +6,7 @@ package com.jeesite.modules.kube.web.vm;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.jeesite.modules.kube.core.Kubeclinet;
+import com.jeesite.modules.kube.core.KubeClinet;
 import com.jeesite.modules.kube.work.SyncCreateVmThread;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -91,20 +91,7 @@ public class KubeVmController extends BaseController {
 	@PostMapping(value = "save")
 	@ResponseBody
 	public String save(@Validated KubeVm kubeVm) {
-		Deployment deployment = createDeployment(1, "1", "1");
-		ObjectMeta metadata = deployment.getMetadata();
-		String deploymentName = metadata.getName();
-		String namespace = metadata.getNamespace();
-
-		kubeVm.setDeploymentName(deploymentName);
-		kubeVm.setNamespace(namespace);
-		//kubeVmService.save(kubeVm);
-		SyncCreateVmThread syncCreateVmThread = new SyncCreateVmThread();
-		//SyncCreateVmThread.syncVmMap.put(deploymentName+"__"+DEFAULT_NAMESPACE,"imageId");
-		SyncCreateVmThread.syncVmMap.put("c2870fdd38ee4ae8bef8331e521f54d1"+"__"+DEFAULT_NAMESPACE,"imageId");
-		syncCreateVmThread.start();
-
-
+		kubeVmService.save(kubeVm);
 		return renderResult(Global.TRUE, text("保存虚拟机成功！"));
 	}
 	
@@ -122,7 +109,7 @@ public class KubeVmController extends BaseController {
 	public Deployment createDeployment(int sun , String cpu, String memory){
 		String imagesName = "registry.cn-hangzhou.aliyuncs.com/centos7-01/centos7-ssh:v1.0";
 
-		KubernetesClient kubeclinet = Kubeclinet.getKubeclinet();
+		KubernetesClient kubeclinet = KubeClinet.getKubeclinet();
 		Deployment deployment = new Deployment();
 
 		DeploymentSpec deploymentSpec = new DeploymentSpec();

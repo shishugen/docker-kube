@@ -7,6 +7,8 @@ import com.jeesite.common.dao.CrudDao;
 import com.jeesite.common.mybatis.annotation.MyBatisDao;
 import com.jeesite.modules.kube.entity.vm.KubeVm;
 
+import java.util.List;
+
 /**
  * 虚拟机DAO接口
  * @author ssg
@@ -14,5 +16,6 @@ import com.jeesite.modules.kube.entity.vm.KubeVm;
  */
 @MyBatisDao
 public interface KubeVmDao extends CrudDao<KubeVm> {
-	
+
+    List<KubeVm> findApplyIdNotBind(KubeVm kubeVm);
 }
