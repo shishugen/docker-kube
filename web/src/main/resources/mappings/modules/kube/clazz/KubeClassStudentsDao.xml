@@ -11,19 +11,18 @@
 		</where>
 		ORDER BY ${sqlMap.order.toSql()}
 	</select> -->
-
-	SELECT * FROM `kube_class_students` c WHERE c.class_id = '1208624803403313152'  AND c.user_id  NOT IN(
-	SELECT a.`user_id` FROM `kube_vm` a WHERE a.`apply_id` = '1209388506417901568' AND  a.`user_id` IS NOT NULL
-	)
-
 	<select id="findApplyIdNotBind" resultType="KubeClassStudents">
 		SELECT ${sqlMap.column.toSql()}
 		FROM ${sqlMap.table.toSql()}
-        LEFT JOIN `kube_vm` v ON v.user_id = a.user_id
         <where>
-				v.`apply_id` = #{applyId}
-			AND	v.`user_id`  IS NULL
-			AND v.`status` = 0
+			    a.class_id = #{classId.id}
+			AND a.user_id  NOT
+			IN(SELECT vm.`user_id` FROM `kube_vm` vm
+			WHERE vm.`apply_id`= #{applyId}
+			AND  vm.`user_id` IS NOT NULL
+			AND vm.`status` = 0
+			)
+			AND a.`status` = 0
 		</where>
 	</select>
 </mapper>

@@ -20,16 +20,15 @@ public class KubeScheduler {
     
     
     @Scheduled(cron="0 */1 * * * ?")
-    public void courseApply(){
-        System.out.println("1111111111111111111222222222");
-        kubeApplyService.findByStartDate();
+    public void bindingVm(){
+        System.out.println("bindingVm--启动");
+        kubeApplyService.bindingVm();
 
     }
 
     @Scheduled(cron="0 */1 * * * ?")
-    public void courseDown(){
-        System.out.println("1111111111111111111222222222");
-      //  kubeApplyService.findBydneDate();
-
+    public void releaseVm(){
+        System.out.println("releaseVm--启动");
+        kubeApplyService.releaseVm();
     }
 }

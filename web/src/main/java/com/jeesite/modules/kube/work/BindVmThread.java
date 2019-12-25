@@ -60,21 +60,23 @@ public class BindVmThread extends Thread {
                     if (KubeApply.ApplyTyep.CLASS_APPLY.ordinal() == type && classId != null){
                         KubeClassStudents kubeClassStudents = new KubeClassStudents();
                         kubeClassStudents.setApplyId(applyId);
+                        kubeClassStudents.setClassId(new KubeClass(classId));
                         List<KubeClassStudents> studentsList = kubeClassStudentsDao.findApplyIdNotBind(kubeClassStudents);
                         System.out.println("studentsList----"+studentsList.size()+"==list"+list.size());
-                        for (int i =0; i < list.size(); i++){
-                            for (int j =0; j < studentsList.size(); j++){
-                                KubeVm vm = list.get(i);
-                                vm.setUserId(studentsList.get(j).getUserId());
-                                kubeVmService.save(vm);
-                                System.err.println("绑定----保存");
+                        //虚拟机数量一定不能小于学生数量
+                            for (int i =0; i < list.size(); i++){
+                                if(studentsList.get(i) !=null){
+                                    KubeVm vm = list.get(i);
+                                    vm.setUserId(studentsList.get(i).getUserId());
+                                    kubeVmService.save(vm);
+                                    System.err.println("绑定----保存"+i);
+                                }
                             }
-                        }
                         if(studentsList.size() == 0){
                             System.err.println("绑定完成----退出");
                             flag.set(false);
                         }else{
-                            Thread.sleep(60000L);
+                            Thread.sleep(30000L);
                             System.err.println("绑定sleep----");
                         }
                         //个人
@@ -84,7 +86,7 @@ public class BindVmThread extends Thread {
                             kubeVmService.save(vm);
                             flag.set(false);
                         });
-                         Thread.sleep(60000L);
+                         Thread.sleep(30000L);
                     }else{
                         System.err.println("预约类型---异常");
                         flag.set(false);

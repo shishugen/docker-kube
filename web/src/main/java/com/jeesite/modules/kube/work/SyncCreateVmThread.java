@@ -51,7 +51,7 @@ public class SyncCreateVmThread  extends  Thread{
                             System.out.println(deploymentName+"---deploymentName-----"+namespace+"----items="+items.size());
                             List<Pod> collect = items.stream().filter((a -> a.getMetadata().getName().indexOf(deploymentName) != -1 &&
                                     KubeVm.VM_STATUS_RUNNING.equals(a.getStatus().getPhase()))).collect(Collectors.toList());
-                            System.out.println("collect创建数量"+collect.size());
+                            System.out.println("collect创建数量=="+collect.size());
                             collect.parallelStream().forEach((vm) -> {
                                 ObjectMeta metadata = vm.getMetadata();
                                 PodStatus status = vm.getStatus();
@@ -70,7 +70,7 @@ public class SyncCreateVmThread  extends  Thread{
                             });
                             if(collect.size() == 0){
                                 try {
-                                    Thread.sleep(60000L);
+                                    Thread.sleep(30000L);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                     flag.set(false);

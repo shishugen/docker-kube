@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.jeesite.modules.kube.core.KubeClinet;
 import com.jeesite.modules.kube.work.SyncCreateVmThread;
+import com.jeesite.modules.sys.utils.UserUtils;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentSpec;
@@ -70,6 +71,9 @@ public class KubeVmController extends BaseController {
 	@ResponseBody
 	public Page<KubeVm> listData(KubeVm kubeVm, HttpServletRequest request, HttpServletResponse response) {
 		kubeVm.setPage(new Page<>(request, response));
+		if(!"system".equals(UserUtils.getUser().getUserCode())){
+			kubeVm.setUserId(UserUtils.getUser());
+		}
 		Page<KubeVm> page = kubeVmService.findPage(kubeVm);
 		return page;
 	}

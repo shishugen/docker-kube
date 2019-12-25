@@ -83,6 +83,9 @@ public class KubeApplyController extends BaseController {
 	public Page<KubeApply> listData(KubeApply kubeApply, HttpServletRequest request, HttpServletResponse response) {
 		kubeApply.setPage(new Page<>(request, response));
 		kubeApply.setType(KubeApply.ApplyTyep.CLASS_APPLY.ordinal());
+		if(!"system".equals(UserUtils.getUser().getUserCode())){
+			kubeApply.setCreateBy(UserUtils.getUser().getId());
+		}
 		Page<KubeApply> page = kubeApplyService.findPage(kubeApply);
 		return page;
 	}
@@ -95,6 +98,9 @@ public class KubeApplyController extends BaseController {
 	public Page<KubeApply> oneListData(KubeApply kubeApply, HttpServletRequest request, HttpServletResponse response) {
 		kubeApply.setPage(new Page<>(request, response));
 		kubeApply.setType(KubeApply.ApplyTyep.ONE_APPLY.ordinal());
+		if(!"system".equals(UserUtils.getUser().getUserCode())){
+			kubeApply.setCreateBy(UserUtils.getUser().getId());
+		}
 		Page<KubeApply> page = kubeApplyService.findPage(kubeApply);
 		return page;
 	}

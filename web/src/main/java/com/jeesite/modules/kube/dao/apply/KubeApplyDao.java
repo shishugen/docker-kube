@@ -18,4 +18,6 @@ import java.util.List;
 public interface KubeApplyDao extends CrudDao<KubeApply> {
 
     List<KubeApply> findByStartDate(KubeApply kubeApply);
+
+    List<KubeApply> findByEndDate(KubeApply kubeApply);
 }

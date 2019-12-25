@@ -3,26 +3,26 @@
  */
 package com.jeesite.modules.kube.service.apply;
 
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.jeesite.modules.kube.core.KubeClinet;
 import com.jeesite.modules.kube.dao.clazz.KubeClassStudentsDao;
 import com.jeesite.modules.kube.entity.clazz.KubeClass;
 import com.jeesite.modules.kube.entity.clazz.KubeClassStudents;
 import com.jeesite.modules.kube.entity.courseimages.KubeCourseImages;
 import com.jeesite.modules.kube.entity.image.KubeImages;
+import com.jeesite.modules.kube.entity.vm.KubeVm;
 import com.jeesite.modules.kube.entity.vmlog.KubeVmLog;
 import com.jeesite.modules.kube.service.courseimages.KubeCourseImagesService;
 import com.jeesite.modules.kube.service.image.KubeImagesService;
+import com.jeesite.modules.kube.service.vm.KubeVmService;
 import com.jeesite.modules.kube.service.vmlog.KubeVmLogService;
-import com.jeesite.modules.kube.utlis.SpringUtil;
 import com.jeesite.modules.kube.work.BindVmThread;
 import com.jeesite.modules.kube.work.CreateVmThread;
-import com.jeesite.modules.sys.entity.Employee;
-import com.jeesite.modules.sys.entity.User;
 import com.jeesite.modules.sys.utils.UserUtils;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.validator.constraints.Length;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +32,7 @@ import com.jeesite.common.service.CrudService;
 import com.jeesite.modules.kube.entity.apply.KubeApply;
 import com.jeesite.modules.kube.dao.apply.KubeApplyDao;
 
-import javax.validation.constraints.NotBlank;
+import static java.util.stream.Collectors.groupingBy;
 
 /**
  * 申请预约Service
@@ -45,6 +45,9 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 
 	@Autowired
     private KubeVmLogService kubeVmLogService;
+
+	@Autowired
+    private KubeVmService kubeVmService;
 	@Autowired
     private KubeClassStudentsDao kubeClassStudentsDao;
 
@@ -66,7 +69,7 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 	/**
 	 * 查询分页数据
 	 * @param kubeApply 查询条件
-	 * @param kubeApply.page 分页对象
+	 * @param
 	 * @return
 	 */
 	@Override
@@ -109,9 +112,14 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 	}
 
 	@Transactional(readOnly=false)
-	public void findByStartDate() {
+	public void bindingVm() {
 		KubeApply kubeApply = new KubeApply();
 		List<KubeApply> list = dao.findByStartDate(kubeApply);
+		if(list == null || list.size() ==0){
+			System.out.println("无申请预约=====》");
+			return;
+		}
+		System.out.println("申请预约=====》"+list.size());
 		list.forEach((apply->{
 			String applyId = apply.getId();
 			String classId = apply.getClassId();
@@ -145,8 +153,50 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 		}));
 	}
 
-	public void findBydneDate() {
 
+	/**
+	 * @Author ssg
+	 * @Description //TODO 释放资源
+	 * @Date  2019/12/25 10:43
+	 * @Param []
+	 * @return void
+	 **/
+	@Transactional(readOnly=false)
+	public void releaseVm() {
+		List<KubeApply> applyList = dao.findByEndDate(new KubeApply());
+		if(applyList == null || applyList.size() ==0){
+			System.out.println("无释放资源=====》");
+			return;
+		}
+		KubernetesClient kubeclinet = KubeClinet.getKubeclinet();
+		applyList.forEach(apply->{
+			KubeVm vm = new KubeVm();
+			vm.setApplyId(apply.getId());
+			List<KubeVm> list = kubeVmService.findList(vm);
+			AtomicBoolean flag = new AtomicBoolean(true);
+			list.forEach(kubeVm -> {
+				kubeVmService.delete(kubeVm);
+				System.err.println("放资源==成功");
+				if (flag.get()){
+					if(kubeclinet.apps().deployments()
+							.inNamespace(kubeVm.getNamespace())
+							.withName(kubeVm.getDeploymentName()).delete()){
+						System.err.println("放资源服务器资源----==成功");
+						flag.set(false);
+					}else{
+						System.err.println("放资源服务器资源----==失败---");
+					}
+				}
+				/*if(deploymentName == null || namespace == null
+						|| !namespace.equals(kubeVm.getNamespace())
+						|| !deploymentName.equals(kubeVm.getDeploymentName())){
+					deploymentName = kubeVm.getDeploymentName();
+					namespace = kubeVm.getNamespace();
+
+				}*/
+			});
+			dao.delete(apply);
+		});
 	}
 
 	public List<KubeCourseImages> getImagesByCourseId(String courseId){
