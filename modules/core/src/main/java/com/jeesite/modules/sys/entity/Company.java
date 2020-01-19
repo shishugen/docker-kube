@@ -48,6 +48,7 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
 					@Column(name="tree_names", label="区域全称"),
 		}),
 	}, extWhereKeys="dsf", orderBy="a.tree_sorts, a.company_code"
+
 )
 public class Company extends TreeEntity<Company> {
 	

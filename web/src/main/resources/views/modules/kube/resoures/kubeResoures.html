@@ -1,0 +1,32 @@
+<% layout('/layouts/default.html', {title: '', bodyClass: ''}){ %>
+<!-- <link rel="stylesheet" href="${ctxStatic}/modules/sys/sysDesktop.css?${_version}"> -->
+<div class="content pb0">
+	<div class="row">
+		<div class="col-md-3 col-sm-6 col-xs-12">
+			<div class="info-box">
+				<span class="info-box-icon bg-aqua"><i class="fa fa-cog"></i></span>
+				<div class="info-box-content">
+					<span class="info-box-text">CPU 使用率</span>
+					<span class="info-box-number">${MEMORY}<small>%</small></span>
+					<span class="info-box-number">90<small>G</small></span>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3 col-sm-6 col-xs-12">
+			<div class="info-box">
+				<span class="info-box-icon bg-red"><i class="fa fa-google-plus"></i></span>
+				<div class="info-box-content">
+					<span class="info-box-text">内存 使用率</span>
+					<span class="info-box-number">90<small>%</small></span>
+					<span class="info-box-number">90<small>G</small></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<% } %>
+<script src="${ctxStatic}/jquery/jquery-ui-sortable-1.12.1.min.js"></script>
+<script>
+
+
+</script>

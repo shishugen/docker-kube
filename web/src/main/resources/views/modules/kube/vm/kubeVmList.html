@@ -104,8 +104,9 @@ $('#dataGrid').dataGrid({
 		{header:'${text("操作")}', name:'actions', width:120, sortable:false, title:false, formatter: function(val, obj, row, act){
 		    var actions = [];
 			<% if(hasPermi('kube:vm:kubeVm:edit')){ %>
-				actions.push('<a href="http://192.168.103.235:2222/ssh/host/'+row.vmIp+'" target="_Blank" class="btnList" title="${text("虚拟机")}"><i class="fa fa-pencil"></i></a>&nbsp;');
+				actions.push('<a href="http://'+row.hostIp+':2222/ssh/host/'+row.vmIp+'" target="_Blank" class="btnList" title="${text("虚拟机")}"><i class="fa fa-pencil"></i></a>&nbsp;');
 				actions.push('<a href="${ctx}/kube/vm/kubeVm/delete?id='+row.id+'" class="btnList" title="${text("删除虚拟机")}" data-confirm="${text("确认要删除该虚拟机吗？")}"><i class="fa fa-trash-o"></i></a>&nbsp;');
+				actions.push('<a href="${ctx}/kube/vm/kubeVm/saveContainer?id='+row.id+'" class="btnList" title="${text("保存虚拟机")}" data-confirm="${text("确认要保存该虚拟机吗？")}"><i class="fa fa-trash-o"></i></a>&nbsp;');
 			<% } %>
 			return actions.join('');
 		}}

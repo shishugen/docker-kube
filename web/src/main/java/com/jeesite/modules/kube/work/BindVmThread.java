@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Author ssg
  * @Date 2019/12/24 9:59
  */
-public class BindVmThread extends Thread {
+public class BindVmThread extends ThreadPool {
 
     static {
 

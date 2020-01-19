@@ -24,6 +24,8 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
 		@Column(name="id", attrName="id", label="编号", isPK=true),
 		@Column(name="vm_name", attrName="vmName", label="虚拟机名称", queryType=QueryType.LIKE),
 		@Column(name="vm_status", attrName="vmStatus", label="虚拟机状态"),
+		@Column(name="type", attrName="type", label="0:生成，1:保存容器生成"),
+		@Column(name="container_id", attrName="containerId", label="containerID"),
 		@Column(name="vm_ip", attrName="vmIp", label="虚拟机IP"),
 		@Column(name="host_ip", attrName="hostIp", label="虚拟机服务器IP"),
 		@Column(name="namespace", attrName="namespace", label="命名空间"),
@@ -48,10 +50,11 @@ public class KubeVm extends DataEntity<KubeVm> {
 	public enum VmStatus{
 		Running;
 	}
-	
+
 	private static final long serialVersionUID = 1L;
 	private String vmName;		// 虚拟机名称
 	private Integer vmStatus;		// 虚拟机状态
+	private Integer type;		// 0:生成，1:保存容器生成
 	private String vmIp;		// 虚拟机IP
 	private String hostIp;		// 虚拟机服务器IP
 	private String namespace;		// 命名空间
@@ -60,7 +63,8 @@ public class KubeVm extends DataEntity<KubeVm> {
 	private User userId;		// 用户
 	private Date vmStartDate;		// 虚拟机启动时间
 	private String applyId;
-	
+	private String containerId; //
+
 	public KubeVm(String deploymentName, String namespace) {
 		this.deploymentName =deploymentName;
 		this.namespace =namespace;
@@ -82,7 +86,7 @@ public class KubeVm extends DataEntity<KubeVm> {
 	public void setVmName(String vmName) {
 		this.vmName = vmName;
 	}
-	
+
 	@Length(min=0, max=1, message="虚拟机状态长度不能超过 1 个字符")
 	public Integer getVmStatus() {
 		return vmStatus;
@@ -91,7 +95,7 @@ public class KubeVm extends DataEntity<KubeVm> {
 	public void setVmStatus(Integer vmStatus) {
 		this.vmStatus = vmStatus;
 	}
-	
+
 	@Length(min=0, max=18, message="虚拟机IP长度不能超过 18 个字符")
 	public String getVmIp() {
 		return vmIp;
@@ -100,7 +104,7 @@ public class KubeVm extends DataEntity<KubeVm> {
 	public void setVmIp(String vmIp) {
 		this.vmIp = vmIp;
 	}
-	
+
 	@Length(min=0, max=18, message="虚拟机服务器IP长度不能超过 18 个字符")
 	public String getHostIp() {
 		return hostIp;
@@ -109,7 +113,7 @@ public class KubeVm extends DataEntity<KubeVm> {
 	public void setHostIp(String hostIp) {
 		this.hostIp = hostIp;
 	}
-	
+
 	@Length(min=0, max=200, message="命名空间长度不能超过 200 个字符")
 	public String getNamespace() {
 		return namespace;
@@ -118,7 +122,7 @@ public class KubeVm extends DataEntity<KubeVm> {
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
 	}
-	
+
 	@Length(min=0, max=100, message="deployment名长度不能超过 100 个字符")
 	public String getDeploymentName() {
 		return deploymentName;
@@ -127,7 +131,7 @@ public class KubeVm extends DataEntity<KubeVm> {
 	public void setDeploymentName(String deploymentName) {
 		this.deploymentName = deploymentName;
 	}
-	
+
 	@Length(min=0, max=64, message="镜像表ID长度不能超过 64 个字符")
 	public String getImagesId() {
 		return imagesId;
@@ -136,7 +140,7 @@ public class KubeVm extends DataEntity<KubeVm> {
 	public void setImagesId(String imagesId) {
 		this.imagesId = imagesId;
 	}
-	
+
 	public User getUserId() {
 		return userId;
 	}
@@ -144,7 +148,7 @@ public class KubeVm extends DataEntity<KubeVm> {
 	public void setUserId(User userId) {
 		this.userId = userId;
 	}
-	
+
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date getVmStartDate() {
 		return vmStartDate;
@@ -160,5 +164,22 @@ public class KubeVm extends DataEntity<KubeVm> {
 
 	public void setApplyId(String applyId) {
 		this.applyId = applyId;
+	}
+
+
+	public String getContainerId() {
+		return containerId;
+	}
+
+	public void setContainerId(String containerId) {
+		this.containerId = containerId;
+	}
+
+	public Integer getType() {
+		return type;
+	}
+
+	public void setType(Integer type) {
+		this.type = type;
 	}
 }

@@ -3,6 +3,7 @@
  */
 package com.jeesite.modules.test.web;
 
+import com.twelvemonkeys.util.WeakWeakMap;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,12 @@ import com.jeesite.common.lang.StringUtils;
 import com.jeesite.common.web.BaseController;
 import com.jeesite.modules.test.entity.TestData;
 import com.jeesite.modules.test.service.TestDataService;
+
+import java.util.AbstractSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * 演示实例Controller
@@ -50,8 +57,9 @@ public class DemoController extends BaseController {
 	 */
 	@RequiresPermissions("test:testData:view")
 	@RequestMapping(value = "form/{viewName}")
-	public String form(@PathVariable String viewName, TestData testData, Model model) {
+	public  String form(@PathVariable String viewName, TestData testData, Model model) {
+		CountDownLatch countDownLatch = new CountDownLatch(3);
 		return "modules/demo/demoForm" + StringUtils.cap(viewName);
 	}
-	
+
 }

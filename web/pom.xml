@@ -80,6 +80,13 @@
 			<version>3.1.0</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/com.imwyh/harbor-java-client -->
+		<dependency>
+			<groupId>com.imwyh</groupId>
+			<artifactId>harbor-java-client</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+
 		<!--spring quartz依赖-->
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>

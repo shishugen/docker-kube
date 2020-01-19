@@ -21,7 +21,9 @@ public class CreateVmThread extends  Thread{
     private String memory;
     private String imagesName;
     private Integer number;
+    private Integer type;
     private String applyId;
+    private String userId;
 
     public CreateVmThread(){ }
 
@@ -31,6 +33,23 @@ public class CreateVmThread extends  Thread{
         this.imagesName = imagesName;
         this.number = number;
         this.applyId = applyId;
+    }
+    public CreateVmThread(String cpu, String memory, String imagesName, Integer number,String applyId,Integer type) {
+        this.cpu = cpu;
+        this.memory = memory;
+        this.imagesName = imagesName;
+        this.number = number;
+        this.applyId = applyId;
+        this.type = type;
+    }
+    public CreateVmThread(String cpu, String memory, String imagesName, Integer number,String applyId,Integer type,String userId) {
+        this.cpu = cpu;
+        this.memory = memory;
+        this.imagesName = imagesName;
+        this.number = number;
+        this.applyId = applyId;
+        this.type = type;
+        this.userId = userId;
     }
     public CreateVmThread(String cpu, String memory, String imagesName, Integer number) {
         this.cpu = cpu;
@@ -106,9 +125,8 @@ public class CreateVmThread extends  Thread{
                     deployment.setSpec(deploymentSpec);
                     Deployment backData = kubeclinet.apps().deployments().inNamespace(DEFAULT_NAMESPACE).create(deployment);
                     System.out.println("backData=="+backData);
-                    SyncCreateVmThread.syncVmMap.put(backData.getMetadata().getName()+"__"+backData.getMetadata().getNamespace(),imagesName);
                     System.out.println("backData111=="+backData);
-                    new SyncCreateVmThread(applyId).start();
+                    ThreadPool.executorService.submit(new SyncCreateVmThread(applyId,type,backData.getMetadata().getName(),backData.getMetadata().getNamespace(),imagesName,userId));
                 } catch (Exception e) {
                     e.printStackTrace();
                     return;

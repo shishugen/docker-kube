@@ -109,71 +109,12 @@ public class KubeVmController extends BaseController {
 		kubeVmService.delete(kubeVm);
 		return renderResult(Global.TRUE, text("删除虚拟机成功！"));
 	}
-
-	public Deployment createDeployment(int sun , String cpu, String memory){
-		String imagesName = "registry.cn-hangzhou.aliyuncs.com/centos7-01/centos7-ssh:v1.0";
-
-		KubernetesClient kubeclinet = KubeClinet.getKubeclinet();
-		Deployment deployment = new Deployment();
-
-		DeploymentSpec deploymentSpec = new DeploymentSpec();
-
-		ObjectMeta metadata0 = new ObjectMeta();
-		metadata0.setName(UUID.randomUUID().toString().replaceAll("-","")); //设置名字
-		deployment.setMetadata(metadata0);
-
-		LabelSelector selector = new LabelSelector();
-		Map<String, String> matchLabels = new HashMap<>();
-		matchLabels.put("app","centos-ssh");
-		selector.setMatchLabels(matchLabels);
-		deploymentSpec.setSelector(selector);
-
-		deploymentSpec.setReplicas(sun);
-
-		PodTemplateSpec template = new PodTemplateSpec();
-
-		ObjectMeta metadata = new ObjectMeta();
-		Map<String, String> labels = new HashMap<>();
-		labels.put("app","centos-ssh");
-		metadata.setLabels(labels);
-		template.setMetadata(metadata);
-
-		PodSpec spec = new PodSpec();
-		List<Container> containerList = new ArrayList<>();
-		Container container = new Container();
-		container.setName("centos-01");
-		container.setImage(imagesName);
-
-		ResourceRequirements resources = new ResourceRequirements();
-		Map<String, Quantity> requestsMap = new HashMap<>();
-		requestsMap.put("cpu",new Quantity(cpu,"G"));
-		requestsMap.put("memory",new Quantity(memory,"Mi"));
-		resources.setRequests(requestsMap);
-
-		container.setResources(resources);
-
-		List<String> commandList = new ArrayList<>();
-		commandList.add("/usr/sbin/sshd");
-		commandList.add("-D");
-		container.setCommand(commandList);
-
-		List<ContainerPort> ports = new ArrayList<>();
-		ContainerPort containerPort = new ContainerPort();
-		containerPort.setProtocol("TCP");
-		//containerPort.setHostPort(22);
-		containerPort.setContainerPort(22);
-		ports.add(containerPort);
-		container.setPorts(ports);
-
-		containerList.add(container);
-		spec.setContainers(containerList);
-		template.setSpec(spec);
-
-		deploymentSpec.setTemplate(template);
-		deployment.setSpec(deploymentSpec);
-		Deployment backData = kubeclinet.apps().deployments().inNamespace(DEFAULT_NAMESPACE).create(deployment);
-
-		return backData;
+	@RequiresPermissions("kube:vm:kubeVm:edit")
+	@RequestMapping(value = "saveContainer")
+	@ResponseBody
+	public String saveContainer(KubeVm kubeVm){
+		kubeVmService.saveContainer(kubeVm);
+		return renderResult(Global.TRUE, text("成功！"));
 	}
 	
 }

@@ -4,7 +4,9 @@
 package com.jeesite.modules.kube.service.apply;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.jeesite.modules.kube.core.KubeClinet;
 import com.jeesite.modules.kube.dao.clazz.KubeClassStudentsDao;
@@ -20,9 +22,14 @@ import com.jeesite.modules.kube.service.vm.KubeVmService;
 import com.jeesite.modules.kube.service.vmlog.KubeVmLogService;
 import com.jeesite.modules.kube.work.BindVmThread;
 import com.jeesite.modules.kube.work.CreateVmThread;
+import com.jeesite.modules.kube.work.ThreadPool;
 import com.jeesite.modules.sys.utils.UserUtils;
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.hssf.record.PageBreakRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -128,28 +135,24 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 			Integer type = apply.getType();
 			//查找当前课程的镜像
 			List<KubeCourseImages> courseImagesList = this.getImagesByCourseId(courseId);
+			System.out.println("镜像=====》"+courseImagesList.size());
 			courseImagesList.forEach(image->{
 				 KubeImages images = kubeImagesService.get(image.getImagesId());
 				 String repositoryNam = images.getRepositoryName();
 				String cpu = images.getCpu();
 				String memory = images.getMemory();
 				Integer number = courseImagesList.size();
+				System.out.println("镜像=====》"+repositoryNam+"==cpu="+cpu+"===memory+"+number);
 				if (StringUtils.isNotBlank(classId)){
 					long count = kubeClassStudentsDao.findCount(new KubeClassStudents(new KubeClass(classId)));
 					number = Integer.valueOf("0" + count);
 				}
-				CreateVmThread createVmThread = new CreateVmThread(cpu,memory,repositoryNam,number,applyId);
-				createVmThread.start();
+				System.out.println("镜像=====》"+repositoryNam+"==cpu="+cpu+"===memory+"+number);
+				ThreadPool.executorService.submit( new CreateVmThread(cpu,memory,repositoryNam,number,applyId));
 			});
 			KubeVmLog vmLog = new KubeVmLog(applyId, KubeVmLog.VmStatus.create.ordinal());
 			kubeVmLogService.save(vmLog);
-			BindVmThread bindVmThread = new BindVmThread(classId,userId,applyId,type);
-			try {
-				Thread.sleep(30000L); //等待30秒
-				bindVmThread.start();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			ThreadPool.executorService.submit(new BindVmThread(classId,userId,applyId,type));
 		}));
 	}
 
@@ -168,7 +171,6 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 			System.out.println("无释放资源=====》");
 			return;
 		}
-		KubernetesClient kubeclinet = KubeClinet.getKubeclinet();
 		applyList.forEach(apply->{
 			KubeVm vm = new KubeVm();
 			vm.setApplyId(apply.getId());
@@ -178,9 +180,7 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 				kubeVmService.delete(kubeVm);
 				System.err.println("放资源==成功");
 				if (flag.get()){
-					if(kubeclinet.apps().deployments()
-							.inNamespace(kubeVm.getNamespace())
-							.withName(kubeVm.getDeploymentName()).delete()){
+					if(KubeClinet.dalDeploment(kubeVm.getDeploymentName())){
 						System.err.println("放资源服务器资源----==成功");
 						flag.set(false);
 					}else{
@@ -202,5 +202,68 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 	public List<KubeCourseImages> getImagesByCourseId(String courseId){
 		 return kubeCourseImagesService.findList(new KubeCourseImages(courseId,null));
 	}
+
+    private static Integer strToNumber(String str){
+        str = str.trim();
+        System.out.println(str);
+        StringBuilder sb = new StringBuilder();
+        if (str != null && !"".equals(str)) {
+            for (int i = 0; i < str.length(); i++) {
+                if (str.charAt(i) >= 48 && str.charAt(i) <= 57) {
+                    sb.append(str.charAt(i)) ;
+                } else {
+                 //   System.out.println("单位"+str.charAt(i));
+                    break;
+                }
+            }
+        }
+        return Integer.valueOf(sb.toString());
+    }
+    public static void main(String[] args) {
+        KubernetesClient kubeclinet = KubeClinet.getKubeclinet();
+        //  List<Pod> items = kubeclinet.pods().inNamespace("default").list().getItems();
+         List<Pod> items = kubeclinet.pods().list().getItems();
+        System.out.println(items);
+
+        AtomicReference<Integer> cpu = new AtomicReference<>(0);
+        AtomicReference<Integer> memory = new AtomicReference<>(0);
+        items.forEach(pod -> {
+            pod.getSpec().getContainers().forEach(container -> {
+                ResourceRequirements resources = container.getResources();
+                if (resources == null)return;
+                Map<String, Quantity> limits = resources.getLimits();
+                Map<String, Quantity> requests = resources.getRequests();
+                if (limits !=null && limits.size() > 0){
+                    Quantity quantityCpu = limits.get("cpu");
+                    Quantity quantityMemory = limits.get("memory");
+                    if(quantityCpu != null){
+                        Integer podCpu = strToNumber(quantityCpu.getAmount());
+                        cpu.updateAndGet(v -> v + podCpu);
+                    }
+                    if(quantityMemory != null){
+                        Integer podMemory = strToNumber(quantityMemory.getAmount());
+                        memory.updateAndGet(m-> m+podMemory);
+                    }
+                }else if(requests !=null && requests.size() > 0){
+                    Quantity quantityCpu = requests.get("cpu");
+                    Quantity quantityMemory = requests.get("memory");
+                    if(quantityCpu != null){
+                        Integer podCpu = strToNumber(quantityCpu.getAmount());
+                        cpu.updateAndGet(v -> v + podCpu);
+                    }
+                   if(quantityMemory != null){
+                        Integer podMemory = strToNumber(quantityMemory.getAmount());
+                        memory.updateAndGet(m-> m+podMemory);
+                    }
+                }
+
+               // quantityCpu.
+            });
+        });
+
+        System.out.println(cpu);
+        System.out.println(memory);
+    }
+
 
 }

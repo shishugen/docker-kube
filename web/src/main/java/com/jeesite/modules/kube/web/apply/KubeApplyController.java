@@ -6,6 +6,7 @@ package com.jeesite.modules.kube.web.apply;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.jeesite.common.mybatis.mapper.query.QueryType;
 import com.jeesite.modules.kube.entity.clazz.KubeClass;
 import com.jeesite.modules.kube.entity.course.KubeCourse;
 import com.jeesite.modules.kube.service.clazz.KubeClassService;
@@ -86,6 +87,11 @@ public class KubeApplyController extends BaseController {
 		if(!"system".equals(UserUtils.getUser().getUserCode())){
 			kubeApply.setCreateBy(UserUtils.getUser().getId());
 		}
+        kubeApply.getSqlMap().getWhere()
+                .and("c1.status", QueryType.EQ, 0)
+                .and("c2.status", QueryType.EQ, 0)
+                .and("c3.status", QueryType.EQ, 0)
+                .and("c4.status", QueryType.EQ, 0);
 		Page<KubeApply> page = kubeApplyService.findPage(kubeApply);
 		return page;
 	}
@@ -101,6 +107,11 @@ public class KubeApplyController extends BaseController {
 		if(!"system".equals(UserUtils.getUser().getUserCode())){
 			kubeApply.setCreateBy(UserUtils.getUser().getId());
 		}
+		kubeApply.getSqlMap().getWhere()
+				.and("c1.status", QueryType.EQ, 0)
+				.and("c2.status", QueryType.EQ, 0)
+				.and("c3.status", QueryType.EQ, 0)
+				.and("c4.status", QueryType.EQ, 0);
 		Page<KubeApply> page = kubeApplyService.findPage(kubeApply);
 		return page;
 	}
