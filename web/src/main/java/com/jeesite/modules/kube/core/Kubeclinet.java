@@ -29,17 +29,17 @@ public class KubeClinet{
             throw new RuntimeException(e);
         }
     }
-        public static KubernetesClient getKubeclinet(){
+    public static KubernetesClient getKubeclinet(){
         Config config = null;
-                if (config == null) {
-                    synchronized (KubeClinet.class) {
-                        System.setProperty(Config.KUBERNETES_KUBECONFIG_FILE, KUBECONFIG_FILE);
-                        config = new ConfigBuilder()
-                               // .withMasterUrl("https://192.168.152.132:6443")
-                                .build();
-                    }
-                }
-                     client = new DefaultKubernetesClient(config);
+        if (config == null) {
+            synchronized (KubeClinet.class) {
+                System.setProperty(Config.KUBERNETES_KUBECONFIG_FILE, KUBECONFIG_FILE);
+                config = new ConfigBuilder()
+                        // .withMasterUrl("https://192.168.152.132:6443")
+                        .build();
+            }
+        }
+        client = new DefaultKubernetesClient(config);
         return client;
     }
 
