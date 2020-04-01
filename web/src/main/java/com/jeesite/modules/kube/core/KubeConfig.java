@@ -14,7 +14,7 @@ public class KubeConfig {
    // public static final String REGISTRY_ADDRESS = "http://192.168.103.236:5000/v2/";
     public static final String REGISTRY_USER_NAME = "admin";
     public static final String REGISTRY_PASSWORD = "Harbor12345";
-    public static final String REGISTRY_REPOSITORY_IP = "192.168.103.236/";
+    public static final String REGISTRY_REPOSITORY_IP = "19.168.103.236/";
     public static final String REGISTRY_REPOSITORY_PROJECT = "centos-test";
 
     //Harbor
