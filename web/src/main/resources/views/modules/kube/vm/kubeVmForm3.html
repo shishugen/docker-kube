@@ -1,0 +1,66 @@
+<HTML>
+<head>
+<HEAD  http-equiv="Content-Type">
+	<TITLE> ZTREE DEMO - Async</TITLE>
+	<meta http-equiv="Content-Type" content="multipart/form-data; charset=utf-8" />
+<!--
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+-->
+	<link rel="stylesheet" href="${ctxStatic}/zTree/css/demo.css" type="text/css">
+	<link rel="stylesheet" href="${ctxStatic}/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+	<script type="text/javascript" src="${ctxStatic}/zTree/js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="${ctxStatic}/zTree/js/jquery.ztree.core.js"></script>
+	<!--  <script type="text/javascript" src="../../../js/jquery.ztree.excheck.js"></script>
+	  <script type="text/javascript" src="../../../js/jquery.ztree.exedit.js"></script>-->
+	<SCRIPT type="text/javascript">
+
+        var setting = {
+            async: {
+              //  type:"get",
+                enable: true,
+               // url:"${ctxStatic}/zTree/json/test.json",
+                url:"${ctx}/kube/vm/upload/getFileDirectory?hostIp=${kubeVm.hostIp}&containerId=${kubeVm.containerId}",
+                autoParam:["id", "name=n", "level=lv"],
+                otherParam:{"otherParam":"zTreeAsyncTest"},
+                dataFilter: filter
+
+            }
+        };
+
+        function filter(treeId, parentNode, childNodes) {
+            if (!childNodes) return null;
+            for (var i=0, l=childNodes.length; i<l; i++) {
+                childNodes[i].name = childNodes[i].name.replace(/\.n/g, '.');
+            }
+            return childNodes;
+        }
+
+
+	</SCRIPT>
+</HEAD>
+
+<BODY>
+<div class="content_wrap">
+	<div class="zTreeDemoBackground left">
+			<ul>
+				<input type="file" name="fileName" id="fileName"/>
+				<input type="button" onclick="sendToUser()" id="sendToUser" value="提交"/>
+			</ul>
+
+		<ul id="treeDemo" class="ztree"></ul>
+
+	</div>
+	<div class="right">
+		<div>
+			<iframe src="http://192.168.103.235:32222/ssh/host/${kubeVm.vmIp}" width="800px" height="800px"></iframe>
+		</div>
+
+	</div>
+</div>
+</BODY>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $.fn.zTree.init($("#treeDemo"), setting);
+    });
+</script>
+</HTML>

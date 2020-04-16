@@ -42,7 +42,7 @@ public class KubeCourseService extends CrudService<KubeCourseDao, KubeCourse> {
 	/**
 	 * 查询分页数据
 	 * @param kubeCourse 查询条件
-	 * @param kubeCourse.page 分页对象
+	 * @param  分页对象
 	 * @return
 	 */
 	@Override
@@ -59,7 +59,12 @@ public class KubeCourseService extends CrudService<KubeCourseDao, KubeCourse> {
 	public void save(KubeCourse kubeCourse) {
 		super.save(kubeCourse);
 		String courseId = kubeCourse.getId();
+
 		if(StringUtils.isNoneBlank(kubeCourse.getImagesIds())){
+			List<KubeCourseImages> list = kubeCourseImagesService.findList(new KubeCourseImages(courseId));
+			list.stream().parallel().forEach(a->{
+				kubeCourseImagesService.delete(a);
+			});
 			String[] imageIds = kubeCourse.getImagesIds().split(",");
 			Arrays.stream(imageIds).forEach(a->{
 				KubeCourseImages kubeCourseImages = new KubeCourseImages(courseId,a);

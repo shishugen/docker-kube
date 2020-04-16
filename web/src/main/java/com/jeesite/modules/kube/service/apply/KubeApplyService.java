@@ -12,16 +12,19 @@ import com.jeesite.modules.kube.core.KubeClinet;
 import com.jeesite.modules.kube.dao.clazz.KubeClassStudentsDao;
 import com.jeesite.modules.kube.entity.clazz.KubeClass;
 import com.jeesite.modules.kube.entity.clazz.KubeClassStudents;
+import com.jeesite.modules.kube.entity.course.KubeCourse;
 import com.jeesite.modules.kube.entity.courseimages.KubeCourseImages;
 import com.jeesite.modules.kube.entity.image.KubeImages;
 import com.jeesite.modules.kube.entity.vm.KubeVm;
 import com.jeesite.modules.kube.entity.vmlog.KubeVmLog;
+import com.jeesite.modules.kube.service.course.KubeCourseService;
 import com.jeesite.modules.kube.service.courseimages.KubeCourseImagesService;
 import com.jeesite.modules.kube.service.image.KubeImagesService;
 import com.jeesite.modules.kube.service.vm.KubeVmService;
 import com.jeesite.modules.kube.service.vmlog.KubeVmLogService;
 import com.jeesite.modules.kube.work.BindVmThread;
 import com.jeesite.modules.kube.work.CreateVmThread;
+import com.jeesite.modules.kube.work.CreateVmThread2;
 import com.jeesite.modules.kube.work.ThreadPool;
 import com.jeesite.modules.sys.utils.UserUtils;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -63,6 +66,9 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 	@Autowired
     private KubeImagesService kubeImagesService;
 
+	@Autowired
+	private KubeCourseService kubeCourseService;
+
 	/**
 	 * 获取单条数据
 	 * @param kubeApply
@@ -91,9 +97,10 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 	@Override
 	@Transactional(readOnly=false)
 	public void save(KubeApply kubeApply) {
-		if (KubeApply.ApplyTyep.ONE_APPLY.ordinal()==kubeApply.getType()){
+		if (KubeApply.CLASS_APPLY==kubeApply.getType()){
+		    kubeApply.setUserId(UserUtils.getUser().getId());
+		}else{
 			kubeApply.setClassId("");
-			kubeApply.setUserId(UserUtils.getUser().getId());
 		}
 		super.save(kubeApply);
 	}
@@ -148,7 +155,7 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 					number = Integer.valueOf("0" + count);
 				}
 				System.out.println("镜像=====》"+repositoryNam+"==cpu="+cpu+"===memory+"+number);
-				ThreadPool.executorService.submit( new CreateVmThread(cpu,memory,repositoryNam,number,applyId));
+				ThreadPool.executorService.submit( new CreateVmThread(cpu,memory,repositoryNam,number,type,applyId));
 			});
 			KubeVmLog vmLog = new KubeVmLog(applyId, KubeVmLog.VmStatus.create.ordinal());
 			kubeVmLogService.save(vmLog);
@@ -264,6 +271,43 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
         System.out.println(cpu);
         System.out.println(memory);
     }
+
+
+
+	@Transactional(readOnly=false)
+	public void bindingVm2() {
+		KubeApply kubeApply = new KubeApply();
+		List<KubeApply> list = dao.findByStartDate(kubeApply);
+		if(list == null || list.size() ==0){
+			System.out.println("无申请预约=====》");
+			return;
+		}
+		System.out.println("申请预约=====》"+list.size());
+		list.forEach((apply-> {
+			String applyId = apply.getId();
+			String classId = apply.getClassId();
+			String courseId = apply.getCourseId();
+
+			KubeCourse kubeCourse = kubeCourseService.get(courseId);
+
+			//查找当前课程的镜像
+			List<KubeCourseImages> courseImagesList = this.getImagesByCourseId(courseId);
+
+			KubeClassStudents kubeClassStudents = new KubeClassStudents();
+			kubeClassStudents.setApplyId(applyId);
+			kubeClassStudents.setClassId(new KubeClass(classId));
+			List<KubeClassStudents> studentsList = kubeClassStudentsDao.findApplyIdNotBind(kubeClassStudents);
+
+			ThreadPool.executorService.submit( new CreateVmThread2(studentsList,courseImagesList,apply,kubeCourse.getCode()));
+
+			//保存日志
+			KubeVmLog vmLog = new KubeVmLog(applyId, KubeVmLog.VmStatus.create.ordinal());
+			kubeVmLogService.save(vmLog);
+		}));
+
+
+
+	}
 
 
 }

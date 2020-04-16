@@ -18,6 +18,7 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
  */
 @Table(name="kube_course", alias="a", columns={
 		@Column(name="id", attrName="id", label="编号", isPK=true),
+		@Column(name="code", attrName="code", label="编码"),
 		@Column(name="course_name", attrName="courseName", label="课程名", queryType=QueryType.LIKE),
 		@Column(name="course_type", attrName="courseType", label="课程类型"),
 		@Column(name="content", attrName="content", label="课程内容", isQuery=false),
@@ -27,6 +28,7 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
 public class KubeCourse extends DataEntity<KubeCourse> {
 	
 	private static final long serialVersionUID = 1L;
+	private String code;		// 编码
 	private String courseName;		// 课程名
 	private String courseType;		// 课程类型
 	private String content;		// 课程内容
@@ -76,5 +78,13 @@ public class KubeCourse extends DataEntity<KubeCourse> {
 
 	public void setImagesIds(String imagesIds) {
 		this.imagesIds = imagesIds;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 }

@@ -2,6 +2,7 @@ package com.jeesite.modules.kube.core;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.DockerCmdExecFactory;
+import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.Info;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -87,7 +88,9 @@ public class DockerClinet {
     }
 
     public static void main(String[] args) {
-        List<Image> exec = DockerClinet.getDockerClient("192.168.103.236").listImagesCmd().exec();
+        List<Container> exec = DockerClinet.getDockerClient("192.168.103.236").listContainersCmd().exec();
+
+
         System.out.println(exec);
 
     }

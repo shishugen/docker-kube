@@ -52,6 +52,7 @@ $('#dataGrid').dataGrid({
 		{header:'${text("课程名")}', name:'courseName', index:'a.course_name', width:150, align:"left", frozen:true, formatter: function(val, obj, row, act){
 			return '<a href="${ctx}/kube/course/kubeCourse/form?id='+row.id+'" class="btnList" data-title="${text("编辑课程")}">'+(val||row.id)+'</a>';
 		}},
+        {header:'${text("编码")}', name:'code', index:'a.code', width:150, align:"center"},
 		{header:'${text("课程类型")}', name:'courseType', index:'a.course_type', width:150, align:"center", formatter: function(val, obj, row, act){
 			return js.getDictLabel(${@DictUtils.getDictListJson('kube_course_type')}, val, '${text("未知")}', true);
 		}},

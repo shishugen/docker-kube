@@ -90,7 +90,13 @@ public class KubeCourseController extends BaseController {
 		List<KubeCourseImages> list = kubeCourseImagesService.findList(kubeCourseImages);
 		List<String> imagesIdsList = list.stream().map(a -> a.getImagesId()).distinct().collect(Collectors.toList());
 		String imagesIds = StringUtils.join(imagesIdsList.toArray(), ",");
-		kubeCourse.setImagesIds(imagesIds);
+
+		KubeCourse kubeCourse1 =  kubeCourseService.get(kubeCourse);
+		if(kubeCourse1 != null){
+			kubeCourse=kubeCourse1;
+			kubeCourse.setImagesIds(imagesIds);
+		}
+
 		model.addAttribute("kubeCourse", kubeCourse);
 		model.addAttribute("imagesList", imagesList);
 		return "modules/kube/course/kubeCourseForm";

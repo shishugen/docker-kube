@@ -57,7 +57,7 @@ public class BindVmThread extends ThreadPool {
                     kubeVm.setApplyId(applyId);
                     List<KubeVm> list =  kubeVmService.findApplyIdNotBind(kubeVm);
                     //班级预约
-                    if (KubeApply.ApplyTyep.CLASS_APPLY.ordinal() == type && classId != null){
+                    if (KubeApply.CLASS_APPLY == type && classId != null){
                         KubeClassStudents kubeClassStudents = new KubeClassStudents();
                         kubeClassStudents.setApplyId(applyId);
                         kubeClassStudents.setClassId(new KubeClass(classId));
@@ -80,7 +80,7 @@ public class BindVmThread extends ThreadPool {
                             System.err.println("绑定sleep----");
                         }
                         //个人
-                    }else if((KubeApply.ApplyTyep.ONE_APPLY.ordinal() == type)){
+                    }else if((KubeApply.ONE_APPLY == type)){
                         list.forEach(vm->{
                             vm.setUserId(new User(userId));
                             kubeVmService.save(vm);

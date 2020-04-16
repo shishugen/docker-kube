@@ -31,6 +31,7 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
 			on="u3.user_code = a.user_id", columns={
 				@Column(name="user_code", label="用户编码", isPK=true),
 				@Column(name="user_name", label="用户名称", isQuery=false),
+				@Column(name="login_code", label="登录名"),
 		}),
 	}, orderBy="a.create_date ASC"
 )

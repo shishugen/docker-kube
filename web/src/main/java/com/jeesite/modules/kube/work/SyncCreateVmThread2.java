@@ -1,24 +1,21 @@
 package com.jeesite.modules.kube.work;
 
+import com.jeesite.common.idgen.IdGen;
 import com.jeesite.common.lang.StringUtils;
 import com.jeesite.modules.kube.core.KubeClinet;
 import com.jeesite.modules.kube.dao.vm.KubeVmDao;
+import com.jeesite.modules.kube.entity.apply.KubeApply;
+import com.jeesite.modules.kube.entity.clazz.KubeClassStudents;
 import com.jeesite.modules.kube.entity.vm.KubeVm;
-import com.jeesite.modules.kube.service.vm.KubeVmService;
 import com.jeesite.modules.kube.utlis.SpringUtil;
-import com.jeesite.modules.sys.entity.User;
-import io.fabric8.kubernetes.api.model.ContainerStatus;
+import com.jeesite.modules.sys.utils.UserUtils;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -28,42 +25,23 @@ import java.util.stream.Collectors;
  * @Author ssg
  * @Date 2019/12/23 15:01
  */
-public class SyncCreateVmThread  extends  Thread{
+public class SyncCreateVmThread2 extends  Thread{
 
-    private String applyId;
     private String namespace;
-    private String deploymentName;
-    private String imagesId;
-    private String userId;
-    private Integer type = 0;
 
-    public SyncCreateVmThread(String applyId) {
-        this.applyId = applyId;
-    }
-    public SyncCreateVmThread(String applyId,Integer type) {
-        this.applyId = applyId;
-        this.type = type;
-    }
-    public SyncCreateVmThread(String applyId,Integer type,String deploymentName ,String namespace ,String imagesId) {
-        this.applyId = applyId;
-        this.type = type;
+    private Integer type = 0;
+    private  KubeClassStudents classStudents ;
+    private  KubeApply apply ;
+
+
+    public SyncCreateVmThread2(KubeClassStudents classStudents, String namespace, KubeApply apply) {
+        this.apply = apply;
+        this.classStudents = classStudents;
         this.namespace = namespace;
-        this.deploymentName = deploymentName;
-        this.imagesId = imagesId;
-    }
-    public SyncCreateVmThread(String applyId,Integer type,String deploymentName ,String namespace ,String imagesId,String userId) {
-        this.applyId = applyId;
-        this.type = type;
-        this.namespace = namespace;
-        this.deploymentName = deploymentName;
-        this.imagesId = imagesId;
-        this.userId = userId;
     }
 
     private KubeVmDao kubeVmDao;
-
     //kay:deployment name   value : images_id
-    public  Map<String,String> syncVmMap = new ConcurrentHashMap<>();
     @Override
     public void run() {
         kubeVmDao = SpringUtil.getBean(KubeVmDao.class);
@@ -71,11 +49,16 @@ public class SyncCreateVmThread  extends  Thread{
         AtomicBoolean flag = new AtomicBoolean(true);
         while (flag.get()){
             synchronized (this){
-                try {//ad62a7c621714ba68452299eac2c5a65-68f56776f9-
+                try {
                     List<Pod> items = kubeclinet.pods().inNamespace(namespace).list().getItems();
-                    System.out.println(deploymentName+"---deploymentName-----"+namespace+"----items="+items.size());
-                    List<Pod> collect = items.stream().filter((a -> a.getMetadata().getName().indexOf(deploymentName) != -1 &&
+
+                    System.out.println("---namespace-----"+namespace+"----items="+items.size());
+
+                   /* List<Pod> collect = items.stream().filter((a -> a.getMetadata().getName().indexOf(namespace) != -1 &&
                             KubeVm.VM_STATUS_RUNNING.equals(a.getStatus().getPhase()))).collect(Collectors.toList());
+                    */
+
+                    List<Pod> collect = items.stream().filter((a -> a.getMetadata().getName().indexOf(namespace) != -1)).collect(Collectors.toList());
                     System.out.println("collect创建数量=="+collect.size());
                     List<KubeVm> kubeVmList = new ArrayList<>();
                     collect.parallelStream().forEach((vm) -> {
@@ -85,12 +68,19 @@ public class SyncCreateVmThread  extends  Thread{
                         kubeVm.setVmName(metadata.getName());
                         kubeVm.setVmIp(status.getPodIP());
                         kubeVm.setHostIp(status.getHostIP());
-                        kubeVm.setVmStatus(KubeVm.VmStatus.Running.ordinal());
-                        kubeVm.setDeploymentName(deploymentName);
+                        Integer integer = KubeVm.VM_STATUS_MAP.get(vm.getStatus().getPhase());
+                        kubeVm.setVmStatus(integer == null ? 404 : integer);
+                       // kubeVm.setDeploymentName(deploymentName);
                         kubeVm.setNamespace(namespace);
-                        kubeVm.setApplyId(applyId);
+                        kubeVm.setApplyId(apply.getId());
                         kubeVm.setType(type == null ? 0 : type);
-                        kubeVm.setUserId(new User(userId));
+                        kubeVm.setUserId(classStudents.getUserId());
+                        String id = IdGen.nextId();
+                        kubeVm.setId(id);
+                        //同步状态
+                        if(vm.getStatus().getPhase() != KubeVm.VM_STATUS_RUNNING){
+                            ThreadPool.executorService.submit(new SyncVmStatus(namespace,metadata.getName(),id));
+                        }
                         status.getContainerStatuses().forEach(st->{
                             String containerID = st.getContainerID();
                             if(StringUtils.isNotEmpty(containerID)){
@@ -100,7 +90,7 @@ public class SyncCreateVmThread  extends  Thread{
                             }
                         });
                         // kubeVm.setVmStartDate(new Date(status.getStartTime()));
-                        kubeVm.setImagesId(imagesId);
+                       // kubeVm.setImagesId(imagesId);
                        // kubeVmDao.save(kubeVm);
                         kubeVmList.add(kubeVm);
                     });
@@ -111,7 +101,7 @@ public class SyncCreateVmThread  extends  Thread{
                     System.out.println("保存虚拟机=="+kubeVmList.size());
                     if(collect.size() == 0){
                         try {
-                            Thread.sleep(30000L);
+                            Thread.sleep(20000L);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                             flag.set(false);
@@ -141,6 +131,16 @@ public class SyncCreateVmThread  extends  Thread{
                 }
             }
         }
+    }
+
+    public static void main(String[] args) {
+        KubernetesClient kubeclinet = KubeClinet.getKubeclinet();
+
+        List<Pod> items = kubeclinet.pods().inNamespace("class-test-user1").list().getItems();
+        System.out.println(items);
+        
+
+
     }
 
 }

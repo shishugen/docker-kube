@@ -4,8 +4,10 @@ import com.madailicai.devops.harbor.HarborClient;
 import com.madailicai.devops.harbor.model.HarborResponse;
 import com.madailicai.devops.harbor.model.Project;
 import com.madailicai.devops.harbor.model.ProjectAndRepoNum;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @ClassName HarborClient
@@ -33,8 +35,23 @@ public class KubeHarborClient {
     }
 
     public static void main(String[] args) throws  Exception{
-        HarborClient harbrClient = getHarbrClient();
-        HarborResponse harborResponse = harbrClient.checkProject("centos-test");
+        RestTemplate template = new RestTemplate();
+
+        List forObject = template.getForObject("http://192.168.103.227/api/projects", List.class);
+        System.out.println("h所有项目:"+forObject.get(0));
+
+
+      //  List forObjec = template.getForObject("http://192.168.103.236/api/repositories?project_id=2", List.class);
+      //  System.out.println("harbor状态:"+forObjec);
+        //fetch("http://192.168.103.236/api/projects/2/summary", {"credentials":"include","headers":{"accept":"application/json","accept-language":"zh-CN,zh;q=0.9","cache-control":"no-cache","content-type":"application/json","pragma":"no-cache"},"referrer":"http://192.168.103.236/harbor/projects/2/summary","referrerPolicy":"no-referrer-when-downgrade","body":null,"method":"GET","mode":"cors"}); ;
+       // fetch("http://192.168.103.236/api/repositories?page=1&page_size=15&project_id=2", {"credentials":"include","headers":{"accept":"application/json","accept-language":"zh-CN,zh;q=0.9","cache-control":"no-cache","content-type":"application/json","pragma":"no-cache"},"referrer":"http://192.168.103.236/harbor/projects/2/repositories","referrerPolicy":"no-referrer-when-downgrade","body":null,"method":"GET","mode":"cors"}); ;
+       // fetch("http://192.168.103.236/api/systeminfo", {"credentials":"include","headers":{"accept":"application/json","accept-language":"zh-CN,zh;q=0.9","cache-control":"no-cache","content-type":"application/json","pragma":"no-cache"},"referrer":"http://192.168.103.236/harbor/projects/2/repositories","referrerPolicy":"no-referrer-when-downgrade","body":null,"method":"GET","mode":"cors"}); ;
+       // fetch("http://192.168.103.236/api/repositories?page=1&page_size=15&project_id=2", {"credentials":"include","headers":{"accept":"application/json","accept-language":"zh-CN,zh;q=0.9","cache-control":"no-cache","content-type":"application/json","pragma":"no-cache"},"referrer":"http://192.168.103.236/harbor/projects/2/repositories","referrerPolicy":"no-referrer-when-downgrade","body":null,"method":"GET","mode":"cors"});
+
+
+
+
+ /*       HarborResponse harborResponse = harbrClient.checkProject("centos-test");
 
         System.out.println(harborResponse);
 
@@ -45,6 +62,6 @@ public class KubeHarborClient {
         System.out.println(project1);
         //  ProjectAndRepoNum statistics = harbrClient.getStatistics();
        // System.out.println(statistics);
-
+*/
     }
 }

@@ -1,147 +1,187 @@
-<% layout('/layouts/default.html', {title: '虚拟机管理', libs: ['validate']}){ %>
-<div class="main-content">
-	<div class="box box-main">
-		<div class="box-header with-border">
-			<div class="box-title">
-				<i class="fa icon-note"></i> ${text(kubeVm.isNewRecord ? '新增虚拟机' : '编辑虚拟机')}
-			</div>
-			<div class="box-tools pull-right">
-				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-			</div>
-		</div>
-		<#form:form id="inputForm" model="${kubeVm}" action="${ctx}/kube/vm/kubeVm/save" method="post" class="form-horizontal">
-			<div class="box-body">
-				<div class="form-unit">${text('基本信息')}</div>
-				<#form:hidden path="id"/>
-				<div class="row">
-					<div class="col-xs-6">
-						<div class="form-group">
-							<label class="control-label col-sm-4" title="">
-								<span class="required hide">*</span> ${text('虚拟机名称')}：<i class="fa icon-question hide"></i></label>
-							<div class="col-sm-8">
-															<#form:input path="vmName" maxlength="200" class="form-control"/>
-							</div>
-						</div>
-					</div>
-					<div class="col-xs-6">
-						<div class="form-group">
-							<label class="control-label col-sm-4" title="">
-								<span class="required hide">*</span> ${text('虚拟机状态')}：<i class="fa icon-question hide"></i></label>
-							<div class="col-sm-8">
-															<#form:select path="vmStatus" dictType="" blankOption="true" class="form-control" />
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-xs-6">
-						<div class="form-group">
-							<label class="control-label col-sm-4" title="">
-								<span class="required hide">*</span> ${text('虚拟机IP')}：<i class="fa icon-question hide"></i></label>
-							<div class="col-sm-8">
-															<#form:input path="vmIp" maxlength="18" class="form-control"/>
-							</div>
-						</div>
-					</div>
-					<div class="col-xs-6">
-						<div class="form-group">
-							<label class="control-label col-sm-4" title="">
-								<span class="required hide">*</span> ${text('虚拟机服务器IP')}：<i class="fa icon-question hide"></i></label>
-							<div class="col-sm-8">
-															<#form:input path="hostIp" maxlength="18" class="form-control"/>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-xs-6">
-						<div class="form-group">
-							<label class="control-label col-sm-4" title="">
-								<span class="required hide">*</span> ${text('命名空间')}：<i class="fa icon-question hide"></i></label>
-							<div class="col-sm-8">
-															<#form:input path="namespace" maxlength="200" class="form-control"/>
-							</div>
-						</div>
-					</div>
-					<div class="col-xs-6">
-						<div class="form-group">
-							<label class="control-label col-sm-4" title="">
-								<span class="required hide">*</span> ${text('deployment名')}：<i class="fa icon-question hide"></i></label>
-							<div class="col-sm-8">
-															<#form:input path="deploymentName" maxlength="100" class="form-control"/>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-xs-6">
-						<div class="form-group">
-							<label class="control-label col-sm-4" title="">
-								<span class="required hide">*</span> ${text('镜像表ID')}：<i class="fa icon-question hide"></i></label>
-							<div class="col-sm-8">
-															<#form:input path="imagesId" maxlength="64" class="form-control"/>
-							</div>
-						</div>
-					</div>
-					<div class="col-xs-6">
-						<div class="form-group">
-							<label class="control-label col-sm-4" title="">
-								<span class="required hide">*</span> ${text('用户')}：<i class="fa icon-question hide"></i></label>
-							<div class="col-sm-8">
-															<#form:input path="userId.userCode" maxlength="64" class="form-control"/>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-xs-6">
-						<div class="form-group">
-							<label class="control-label col-sm-4" title="">
-								<span class="required hide">*</span> ${text('虚拟机启动时间')}：<i class="fa icon-question hide"></i></label>
-							<div class="col-sm-8">
-															<#form:input path="vmStartDate" readonly="true" maxlength="20" class="form-control Wdate"
-									dataFormat="datetime" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm',isShowClear:true});"/>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-xs-12">
-						<div class="form-group">
-							<label class="control-label col-sm-2" title="">
-								<span class="required hide">*</span> ${text('备注信息')}：<i class="fa icon-question hide"></i></label>
-							<div class="col-sm-10">
-															<#form:textarea path="remarks" rows="4" maxlength="500" class="form-control"/>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="box-footer">
-				<div class="row">
-					<div class="col-sm-offset-2 col-sm-10">
-						<% if (hasPermi('kube:vm:kubeVm:edit')){ %>
-							<button type="submit" class="btn btn-sm btn-primary" id="btnSubmit"><i class="fa fa-check"></i> ${text('保 存')}</button>&nbsp;
-						<% } %>
-						<button type="button" class="btn btn-sm btn-default" id="btnCancel" onclick="js.closeCurrentTabPage()"><i class="fa fa-reply-all"></i> ${text('关 闭')}</button>
-					</div>
-				</div>
-			</div>
-		</#form:form>
-	</div>
-</div>
-<% } %>
-<script>
-$("#inputForm").validate({
-	submitHandler: function(form){
-		js.ajaxSubmitForm($(form), function(data){
-			js.showMessage(data.message);
-			if(data.result == Global.TRUE){
-				js.closeCurrentTabPage(function(contentWindow){
-					contentWindow.page();
-				});
+<% layout('/layouts/default.html', {title: '虚拟机管理', libs: ['dataGrid']}){ %>
+
+<HEAD  http-equiv="Content-Type">
+	<TITLE> ZTREE DEMO - Async</TITLE>
+	<meta http-equiv="Content-Type" content="multipart/form-data; charset=utf-8" />
+	<!--
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    -->
+	<link rel="stylesheet" href="${ctxStatic}/zTree/css/demo.css" type="text/css">
+	<link rel="stylesheet" href="${ctxStatic}/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+<!--
+	<script type="text/javascript" src="${ctxStatic}/zTree/js/jquery-1.4.4.min.js"></script>
+-->
+	<script type="text/javascript" src="${ctxStatic}/zTree/js/jquery.ztree.core.js"></script>
+	<!--  <script type="text/javascript" src="../../../js/jquery.ztree.excheck.js"></script>
+	  <script type="text/javascript" src="../../../js/jquery.ztree.exedit.js"></script>-->
+	<SCRIPT type="text/javascript">
+
+		var path = "/home";
+		var fileName ="";
+        var setting = {
+            async: {
+                //  type:"get",
+                enable: true,
+                // url:"${ctxStatic}/zTree/json/test.json",
+                url:"${ctx}/kube/vm/upload/getFileDirectory?hostIp=${kubeVm.hostIp}&containerId=${kubeVm.containerId}",
+                autoParam:["id", "name=n", "level=lv"],
+                otherParam:{"otherParam":"zTreeAsyncTest"},
+                dataFilter: filter
+
+            },
+            callback: {
+                onClick: toOnClick,
 			}
-		}, "json");
+        };
+
+        function filter(treeId, parentNode, childNodes) {
+            if (!childNodes) return null;
+            for (var i=0, l=childNodes.length; i<l; i++) {
+                childNodes[i].name = childNodes[i].name.replace(/\.n/g, '.');
+            }
+            return childNodes;
+        }
+
+        function toOnClick(event, treeId, treeNode) {
+        /*    console.log(treeNode);
+            console.log(treeId);
+            console.log(event);*/
+            console.log(treeNode.id);
+            console.log(treeNode.name);
+            path=treeNode.id;
+            if(treeNode.isParent == false){
+                fileName =treeNode.name
+			}
+
+        }
+
+
+	</SCRIPT>
+</HEAD>
+
+
+
+<div class="main-content">
+	<input type="file" name="fileName"  id="fileName"/>
+	<input type="button" onclick="sendToUser()" id="sendToUser" value="上传"/>
+	<input type="button" onclick="refresh()" id="refresh" value="刷新"/>
+	<input type="button" onclick="download()"  value="下载"/>
+
+</div>
+
+<div class="content_wrap">
+
+
+	<div class="zTreeDemoBackground left">
+			<ul id="treeDemo" class="ztree"></ul>
+	</div>
+	<div class="right">
+			<iframe src="http://192.168.103.235:32222/ssh/host/${kubeVm.vmIp}" width="800px" height="400px"></iframe>
+	</div>
+	</div>
+
+<% } %>
+<body>
+<div id="idOuterDiv" class="CsOuterDiv">
+	eeeeeeeeeeeeeeeeee
+</div>
+
+</body>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $.fn.zTree.init($("#treeDemo"), setting);
+    });
+
+    function sendToUser() {
+        var file1 = $("input[name='fileName']").val();
+        if (file1 == "" ) {
+            alert("请选择上传的目标文件 "+path)
+            return false;
+        }
+        console.log("${kubeVm.id}","----------",$("#fileName")[0].files[0])
+        boo1 = true;
+        var type = "file";
+        var formData = new FormData();
+        formData.append(type,$("#fileName")[0].files[0]);
+        formData.append("id",'${kubeVm.id}');
+        formData.append("path",path);
+        $.ajax({
+            type : "post",
+            url : "${ctx}/kube/vm/kubeVm/uploadToFile",
+            data : formData,
+            processData : false,
+            contentType : false,
+            success : function(data){
+                if (data=="error") {
+                    alert("文件提交失败!");
+                }else{
+                    $("input[name='userUrl']").val(data);
+                    alert("文件上传成功!");
+                    var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+                    zTree.reAsyncChildNodes(null, "refresh");
+
+                }}
+        });
+
     }
-});
+
+    function download() {
+       if(fileName == ""){
+           alert("请选择下载文件不能选择文件夹")
+           return false;
+       }
+        window.location.href='${ctx}/kube/vm/kubeVm/downloadFile?file='+fileName+'&id=${kubeVm.id}&path='+path;
+
+    }
+
+    function refresh() {
+        var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+        zTree.reAsyncChildNodes(null, "refresh");
+
+    }
+
+
+    function dragFunc(id) {
+        var Drag = document.getElementById(id);
+        Drag.onmousedown = function(event) {
+            var ev = event || window.event;
+            event.stopPropagation();
+            var disX = ev.clientX - Drag.offsetLeft;
+            var disY = ev.clientY - Drag.offsetTop;
+            document.onmousemove = function(event) {
+                var ev = event || window.event;
+                Drag.style.left = ev.clientX - disX + "px";
+                Drag.style.top = ev.clientY - disY + "px";
+                Drag.style.cursor = "move";
+            };
+        };
+        Drag.onmouseup = function() {
+            document.onmousemove = null;
+            this.style.cursor = "default";
+        };
+    };
+    dragFunc("idOuterDiv");
+
+</script>
+<script type="text/css">
+	body {
+		background-color:#232429;
+	}
+	.CsOuterDiv {
+		width:256px;
+		height:146px;
+		background-color:white;
+		position:absolute;
+		top:50%;
+		left:50%;
+		transform:translateX(-50%) translateY(-50%);
+		-moz-transform:translateX(-50%) translateY(-50%);
+		-webkit-transform:translateX(-50%) translateY(-50%);
+		-ms-transform:translateX(-50%) translateY(-50%);
+		border-radius:5px;
+		box-shadow:3px 3px  10px blue;
+	}
+
+
 </script>

@@ -1,6 +1,8 @@
 package com.jeesite.modules.kube.work;
 
 import com.jeesite.modules.kube.core.KubeClinet;
+import com.jeesite.modules.kube.entity.apply.KubeApply;
+import com.jeesite.modules.sys.utils.UserUtils;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentSpec;
@@ -21,9 +23,11 @@ public class CreateVmThread extends  Thread{
     private String memory;
     private String imagesName;
     private Integer number;
-    private Integer type;
+    private Integer type;  //申请类型
     private String applyId;
     private String userId;
+    private  String DEFAULT_NAMESPACE = "default";
+    private static final String DEFAULT_IMAGES_NAME = "registry.cn-hangzhou.aliyuncs.com/centos7-01/centos7-ssh:v1.0";
 
     public CreateVmThread(){ }
 
@@ -34,14 +38,16 @@ public class CreateVmThread extends  Thread{
         this.number = number;
         this.applyId = applyId;
     }
-    public CreateVmThread(String cpu, String memory, String imagesName, Integer number,String applyId,Integer type) {
+    public CreateVmThread(String cpu, String memory, String imagesName, Integer number,Integer type,String applyId) {
         this.cpu = cpu;
         this.memory = memory;
         this.imagesName = imagesName;
         this.number = number;
         this.applyId = applyId;
         this.type = type;
+        this.DEFAULT_NAMESPACE = UserUtils.getUser().getLoginCode()+"_"+UUID.randomUUID().toString().replace("-","");
     }
+
     public CreateVmThread(String cpu, String memory, String imagesName, Integer number,String applyId,Integer type,String userId) {
         this.cpu = cpu;
         this.memory = memory;
@@ -64,8 +70,7 @@ public class CreateVmThread extends  Thread{
         this.number = number;
     }
 
-    private static final String DEFAULT_NAMESPACE = "default";
-    private static final String DEFAULT_IMAGES_NAME = "registry.cn-hangzhou.aliyuncs.com/centos7-01/centos7-ssh:v1.0";
+
 
     //kay:deployment name   value : images_id
     public static Map<String,String> syncVmMap = new ConcurrentHashMap<>();
@@ -102,14 +107,11 @@ public class CreateVmThread extends  Thread{
                     requestsMap.put("cpu",new Quantity(cpu,"G"));
                     requestsMap.put("memory",new Quantity(memory,"Mi"));
                     resources.setRequests(requestsMap);
-
                     container.setResources(resources);
-
                     List<String> commandList = new ArrayList<>();
                     commandList.add("/usr/sbin/sshd");
                     commandList.add("-D");
                     container.setCommand(commandList);
-
                     List<ContainerPort> ports = new ArrayList<>();
                     ContainerPort containerPort = new ContainerPort();
                     containerPort.setProtocol("TCP");
@@ -123,9 +125,17 @@ public class CreateVmThread extends  Thread{
                     template.setSpec(spec);
                     deploymentSpec.setTemplate(template);
                     deployment.setSpec(deploymentSpec);
+
+                    //创建命名空间
+                    if(type == KubeApply.ONE_APPLY ||!KubeClinet.checkNamespace(DEFAULT_NAMESPACE)){
+                            if(!KubeClinet.createNamespace(DEFAULT_NAMESPACE)){
+                            System.err.print("创建命名空间失败 exit");
+                            return;
+                        }
+                      }
+
                     Deployment backData = kubeclinet.apps().deployments().inNamespace(DEFAULT_NAMESPACE).create(deployment);
                     System.out.println("backData=="+backData);
-                    System.out.println("backData111=="+backData);
                     ThreadPool.executorService.submit(new SyncCreateVmThread(applyId,type,backData.getMetadata().getName(),backData.getMetadata().getNamespace(),imagesName,userId));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -133,4 +143,5 @@ public class CreateVmThread extends  Thread{
                 }
             }
     }
+
 }

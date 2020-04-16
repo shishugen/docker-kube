@@ -165,9 +165,9 @@ public class KubeVmService extends CrudService<KubeVmDao, KubeVm> {
             PushImage pushImage = new PushImage();
 
             //push
-            dockerClient.pushImageCmd(repository+"/"+loginName).withTag(version+"").withAuthConfig(authConfig).exec(pushImage).awaitSuccess();
+            dockerClient.pushImageCmd(repository+"/"+loginName).withTag(version+"").withAuthConfig(authConfig).exec(pushImage ).awaitSuccess();
             System.out.println("OK");
-            Boolean success = pushImage.isSuccess();
+          //  Boolean success = pushImage.isSuccess();
           /*  if(success && kubeUserImage != null){
                 DockerClinet.delImage(kubeUserImage.getImagesId());
                 kubeUserImagesService.delete(kubeUserImage);
@@ -177,7 +177,6 @@ public class KubeVmService extends CrudService<KubeVmDao, KubeVm> {
 
 	private class PushImage extends PushImageResultCallback{
 	    private Boolean flag = false;
-
         @Override
         public void onNext(PushResponseItem item) {
             System.out.println("id:" + item.getId() + " status: " + item.getStatus());
@@ -189,14 +188,13 @@ public class KubeVmService extends CrudService<KubeVmDao, KubeVm> {
 
         @Override
         public void onError(Throwable throwable) {
-            System.out.println("Image pushed completed!");
+            System.out.println("Image pushed completed!"+throwable);
             super.onError(throwable);
         }
 
         @Override
         public void onComplete() {
             System.out.println("Image pushed completed!");
-            flag = true;
             System.out.println("完成");
             super.onComplete();
         }
@@ -211,11 +209,72 @@ public class KubeVmService extends CrudService<KubeVmDao, KubeVm> {
         }
     }
 
+
+
+
 	private static final String DEFAULT_NAMESPACE = "default";
 	private static final String DEFAULT_IMAGES_NAME = "registry.cn-hangzhou.aliyuncs.com/centos7-01/centos7-ssh:v1.0";
 
 	public static void main(String[] args) {
-		KubernetesClient kubeclinet = KubeClinet.getKubeclinet();
+
+        DockerClient dockerClient = DockerClinet.getDockerClient();
+
+		//List<Image> exec = dockerClient.listImagesCmd().exec();
+		//System.out.println(exec);
+		//String str ="b4f5bb6c56e9";
+		//	String exec1 = dockerClient.commitCmd(str).withRepository("test001001").withTag("123").exec();
+		//	System.out.println(exec1);
+		//test("100",1,1,DEFAULT_IMAGES_NAME);
+		//List<Pod> items = kubeclinet.pods().inNamespace(DEFAULT_NAMESPACE).list().getItems();
+	//	String image = dockerClient.commitCmd(containerId).withRepository("test001001").withTag("v2").exec();
+
+		//上传验证的私服仓库的镜像必须设置
+		AuthConfig authConfig = new AuthConfig();
+		authConfig.withUsername("admin");
+		authConfig.withPassword("Harbor12345");
+		String coentid ="ddd51729142b3f5c6901f7fa405003f866185b9b396d81d25506fb41b7b14968";
+		String repository ="192.168.103.236/centos-test/";
+		String loginName = "user1";
+		String tag ="1.0";
+		//String exec1 = dockerClient.commitCmd(coentid).withRepository(repository+loginName).withTag(tag).exec();
+		//System.out.println(exec1);//sha256:5a193119a1e1e5e4cc1e3a97a7d1234daa9041dbea1514bc4acb59f6547dee33
+		//String imag ="192.168.103.235/centos-ssh/nginx-test";
+		String imageId = "5a193119a1e1e5e4cc1e3a97a7d1234daa9041dbea1514bc4acb59f6547dee33";
+
+        dockerClient.pushImageCmd(repository+loginName).withTag(tag).withAuthConfig(authConfig).exec(new PushImageResultCallback() {
+			@Override
+			public void onNext(PushResponseItem item) {
+				System.out.println("id:" + item.getId() + " status: " + item.getStatus());
+				System.out.println("item=====->>"+item);
+				super.onNext(item);
+				if("Pushed".equals(item.getStatus())){
+					System.out.println("成功");
+				}else{
+
+				}
+			}
+
+			@Override
+			public void onComplete() {
+				System.out.println("Image pushed completed!");
+				super.onComplete();
+			}
+
+			@Override
+			public void onError(Throwable throwable) {
+				System.out.println("Image pushed onError!");
+				super.onError(throwable);
+			}
+		}).awaitSuccess();
+		System.out.println("OK");
+
+        PushImageResultCallback pushImageResultCallback = new PushImageResultCallback();
+
+
+    }
+
+    public  void test(){
+        KubernetesClient kubeclinet = KubeClinet.getKubeclinet();
         NodeList list = kubeclinet.nodes().list();
         List<Node> items1 = list.getItems();
         System.out.println(items1);
@@ -290,66 +349,7 @@ public class KubeVmService extends CrudService<KubeVmDao, KubeVm> {
         System.out.println("totalMemory--->"+totalMemory);
         System.out.println("totalCpu----->"+totalCpu);
         System.out.println("totalStorage----->"+totalStorage);
-
-
-        DockerClient dockerClient = DockerClinet.getDockerClient();
-        Void exec1 = dockerClient.removeImageCmd("5a193119a1e1e5e4cc1e3a97a7d1234daa9041dbea1514bc4acb59f6547dee33").exec();
-
-        //	String containerId = "6bdc262c2cd434ad6248d301c4ba947dd1b4de6e7c2842c20d8b1741531221e2";
-		List<Image> exec = dockerClient.listImagesCmd().exec();
-		//System.out.println(exec);
-		//String str ="b4f5bb6c56e9";
-		//	String exec1 = dockerClient.commitCmd(str).withRepository("test001001").withTag("123").exec();
-		//	System.out.println(exec1);
-		//test("100",1,1,DEFAULT_IMAGES_NAME);
-		List<Pod> items = kubeclinet.pods().inNamespace(DEFAULT_NAMESPACE).list().getItems();
-	//	String image = dockerClient.commitCmd(containerId).withRepository("test001001").withTag("v2").exec();
-
-		//上传验证的私服仓库的镜像必须设置
-		AuthConfig authConfig = new AuthConfig();
-		//authConfig.withRegistryAddress("http://192.168.103.236:5000/v2/");
-		authConfig.withUsername("admin");
-		authConfig.withPassword("Harbor12345");
-		String coentid ="ddd51729142b3f5c6901f7fa405003f866185b9b396d81d25506fb41b7b14968";
-		String repository ="192.168.103.235/centos-ssh/";
-		String loginName = "lishi";
-		String tag ="v1";
-		//String exec1 = dockerClient.commitCmd(coentid).withRepository(repository+loginName).withTag(tag).exec();
-		//System.out.println(exec1);//sha256:5a193119a1e1e5e4cc1e3a97a7d1234daa9041dbea1514bc4acb59f6547dee33
-		//String imag ="192.168.103.235/centos-ssh/nginx-test";
-		String imageId = "5a193119a1e1e5e4cc1e3a97a7d1234daa9041dbea1514bc4acb59f6547dee33";
-		 boolean flag = false;
-
-        dockerClient.pushImageCmd(repository+loginName).withTag(tag).withAuthConfig(authConfig).exec(new PushImageResultCallback() {
-			@Override
-			public void onNext(PushResponseItem item) {
-				System.out.println("id:" + item.getId() + " status: " + item.getStatus());
-				System.out.println("item=====->>"+item);
-				super.onNext(item);
-				if("Pushed".equals(item.getStatus())){
-					System.out.println("成功");
-				}else{
-
-				}
-			}
-
-			@Override
-			public void onComplete() {
-				System.out.println("Image pushed completed!");
-				super.onComplete();
-			}
-
-			@Override
-			public void onError(Throwable throwable) {
-				System.out.println("Image pushed onError!");
-				super.onError(throwable);
-			}
-		}).awaitSuccess();
-		System.out.println("OK");
-
-        PushImageResultCallback pushImageResultCallback = new PushImageResultCallback();
-
-
     }
+
 
 }

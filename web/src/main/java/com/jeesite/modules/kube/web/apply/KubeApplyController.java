@@ -83,15 +83,14 @@ public class KubeApplyController extends BaseController {
 	@ResponseBody
 	public Page<KubeApply> listData(KubeApply kubeApply, HttpServletRequest request, HttpServletResponse response) {
 		kubeApply.setPage(new Page<>(request, response));
-		kubeApply.setType(KubeApply.ApplyTyep.CLASS_APPLY.ordinal());
+		kubeApply.setType(KubeApply.CLASS_APPLY);
 		if(!"system".equals(UserUtils.getUser().getUserCode())){
 			kubeApply.setCreateBy(UserUtils.getUser().getId());
 		}
         kubeApply.getSqlMap().getWhere()
                 .and("c1.status", QueryType.EQ, 0)
-                .and("c2.status", QueryType.EQ, 0)
-                .and("c3.status", QueryType.EQ, 0)
-                .and("c4.status", QueryType.EQ, 0);
+                .and("c2.status", QueryType.EQ, 0);
+
 		Page<KubeApply> page = kubeApplyService.findPage(kubeApply);
 		return page;
 	}
@@ -103,15 +102,14 @@ public class KubeApplyController extends BaseController {
 	@ResponseBody
 	public Page<KubeApply> oneListData(KubeApply kubeApply, HttpServletRequest request, HttpServletResponse response) {
 		kubeApply.setPage(new Page<>(request, response));
-		kubeApply.setType(KubeApply.ApplyTyep.ONE_APPLY.ordinal());
+		kubeApply.setType(KubeApply.ONE_APPLY);
 		if(!"system".equals(UserUtils.getUser().getUserCode())){
 			kubeApply.setCreateBy(UserUtils.getUser().getId());
 		}
 		kubeApply.getSqlMap().getWhere()
 				.and("c1.status", QueryType.EQ, 0)
-				.and("c2.status", QueryType.EQ, 0)
-				.and("c3.status", QueryType.EQ, 0)
-				.and("c4.status", QueryType.EQ, 0);
+				.and("c2.status", QueryType.EQ, 0);
+
 		Page<KubeApply> page = kubeApplyService.findPage(kubeApply);
 		return page;
 	}
@@ -149,7 +147,7 @@ public class KubeApplyController extends BaseController {
 	@PostMapping(value = "save")
 	@ResponseBody
 	public String save(@Validated KubeApply kubeApply) {
-		kubeApply.setType(KubeApply.ApplyTyep.CLASS_APPLY.ordinal());
+		kubeApply.setType(KubeApply.CLASS_APPLY);
 		kubeApplyService.save(kubeApply);
 		return renderResult(Global.TRUE, text("保存申请预约成功！"));
 	}
@@ -161,7 +159,7 @@ public class KubeApplyController extends BaseController {
 	@PostMapping(value = "oneSave")
 	@ResponseBody
 	public String oneSave(@Validated KubeApply kubeApply) {
-		kubeApply.setType(KubeApply.ApplyTyep.ONE_APPLY.ordinal());
+		kubeApply.setType(KubeApply.ONE_APPLY);
 		kubeApplyService.save(kubeApply);
 		return renderResult(Global.TRUE, text("保存申请预约成功！"));
 	}

@@ -7,6 +7,8 @@ import com.jeesite.modules.Application;
 import com.jeesite.modules.kube.dao.clazz.KubeClassStudentsDao;
 import com.jeesite.modules.kube.entity.clazz.KubeClass;
 import com.jeesite.modules.kube.entity.clazz.KubeClassStudents;
+import com.jeesite.modules.kube.entity.courseimages.KubeCourseImages;
+import com.jeesite.modules.kube.service.courseimages.KubeCourseImagesService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,15 +29,12 @@ public class KubectTest extends com.jeesite.modules.sys.db.InitCoreData {
 
 
 	@Autowired
-	private KubeClassStudentsDao kubeClassStudentsDao;
+	private KubeCourseImagesService kubeCourseImagesService;
 
 	@Test
 	public void initCoreData() throws Exception{
-		KubeClassStudents kubeClassStudents = new KubeClassStudents();
-		kubeClassStudents.setApplyId("1209388506417901568");
-		kubeClassStudents.setClassId(new KubeClass("1208624803403313152"));
-		List<KubeClassStudents> studentsList = kubeClassStudentsDao.findApplyIdNotBind(kubeClassStudents);
-		System.out.println(studentsList);
+		List<KubeCourseImages> list = kubeCourseImagesService.findList(new KubeCourseImages("1249909188377997312"));
+		System.out.println(list);
 	}
 	
 }

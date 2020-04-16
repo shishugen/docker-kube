@@ -22,13 +22,13 @@ public class KubeScheduler {
     @Scheduled(cron="0 */1 * * * ?")
     public void bindingVm(){
         System.out.println("bindingVm--启动");
-        kubeApplyService.bindingVm();
-
+      //  kubeApplyService.bindingVm();
+      //  kubeApplyService.bindingVm2();
     }
 
     @Scheduled(cron="0 */1 * * * ?")
     public void releaseVm(){
-        System.out.println("releaseVm--启动");
-        kubeApplyService.releaseVm();
+     //   System.out.println("releaseVm--启动");
+     //   kubeApplyService.releaseVm();
     }
 }

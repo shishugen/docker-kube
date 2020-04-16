@@ -98,12 +98,13 @@ public class KubeImagesController extends BaseController {
 			).collect(Collectors.toList());
 			return collect1;
 		}).collect(Collectors.toList());
-		List<KubeImages> kubeImagesList = new ArrayList<>();
+/*		List<KubeImages> kubeImagesList = new ArrayList<>();
 		for (List<KubeImages> list :collect){
 			for (KubeImages s :list){
 				kubeImagesList.add(s);
 			}
-		}
+		}*/
+		List<KubeImages> kubeImagesList = collect.stream().findAny().get();
 		model.addAttribute("kubeImages", kubeImages);
 		model.addAttribute("imageList",kubeImagesList );
 		kubeImageCache.put(KUBE_IMAGE_KEY,kubeImagesList);

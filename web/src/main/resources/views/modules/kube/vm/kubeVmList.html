@@ -1,5 +1,19 @@
 <% layout('/layouts/default.html', {title: '虚拟机管理', libs: ['dataGrid']}){ %>
 <div class="main-content">
+
+
+	<label>文件上传</label>
+	<div class="form-group">
+		<label class="control-label col-sm-4" title="">
+			<span class="required hide">*</span> ${text('虚拟机')}：<i class="fa icon-question hide"></i></label>
+		<div class="col-sm-3">
+			<#form:select path="id" id="vmName" items="${kubeVmList}" itemLabel="vmName" itemValue="id" multiple="" blankOption="true" class="form-control" />
+		</div>
+		<input type="file" name="fileName1"  id="fileName1"/>
+		<input type="button"  id="sendToUser" value="提交"/>
+	</div>
+
+
 	<div class="box box-main">
 		<div class="box-header">
 			<div class="box-title">
@@ -8,10 +22,11 @@
 			<div class="box-tools pull-right">
 				<a href="#" class="btn btn-default" id="btnSearch" title="${text('查询')}"><i class="fa fa-filter"></i> ${text('查询')}</a>
 				<% if(hasPermi('kube:vm:kubeVm:edit')){ %>
-<!--
-					<a href="${ctx}/kube/vm/kubeVm/form" class="btn btn-default btnTool" title="${text('新增虚拟机')}"><i class="fa fa-plus"></i> ${text('新增')}</a>
--->
+
+
 				<% } %>
+				<a href="${ctx}/kube/vm/kubeVm/form" class="btn btn-default btnTool" title="${text('新增虚拟机')}"><i class="fa fa-plus"></i> ${text('新增')}</a>
+
 			</div>
 		</div>
 		<div class="box-body">
@@ -104,7 +119,10 @@ $('#dataGrid').dataGrid({
 		{header:'${text("操作")}', name:'actions', width:120, sortable:false, title:false, formatter: function(val, obj, row, act){
 		    var actions = [];
 			<% if(hasPermi('kube:vm:kubeVm:edit')){ %>
-				actions.push('<a href="http://'+row.hostIp+':2222/ssh/host/'+row.vmIp+'" target="_Blank" class="btnList" title="${text("虚拟机")}"><i class="fa fa-pencil"></i></a>&nbsp;');
+				actions.push('<a href="${ctx}/kube/vm/kubeVm/form?id='+row.id+'" target="_Blank" class="btnList" title="${text("虚拟机")}"><i class="fa fa-pencil"></i></a>&nbsp;');
+/*
+				actions.push('<a href="http://192.168.103.235:32222/ssh/host/'+row.vmIp+'" target="_Blank" class="btnList" title="${text("虚拟机")}"><i class="fa fa-pencil"></i></a>&nbsp;');
+*/
 				actions.push('<a href="${ctx}/kube/vm/kubeVm/delete?id='+row.id+'" class="btnList" title="${text("删除虚拟机")}" data-confirm="${text("确认要删除该虚拟机吗？")}"><i class="fa fa-trash-o"></i></a>&nbsp;');
 				actions.push('<a href="${ctx}/kube/vm/kubeVm/saveContainer?id='+row.id+'" class="btnList" title="${text("保存虚拟机")}" data-confirm="${text("确认要保存该虚拟机吗？")}"><i class="fa fa-trash-o"></i></a>&nbsp;');
 			<% } %>
@@ -116,4 +134,36 @@ $('#dataGrid').dataGrid({
 		
 	}
 });
+
+
+$("#sendToUser").on('click',function(){
+    var file1 = $("input[name='fileName1']").val();
+    var id = $("#vmName").val();
+    if (file1 == "" || id == '') {
+        alert("请选择上传的目标文件彧虚拟机 ")
+        return false;
+    }
+    boo1 = true;
+    var type = "file";
+    var formData = new FormData();
+    formData.append(type,$("#fileName1")[0].files[0]);
+    formData.append("id",id);
+    $.ajax({
+        type : "post",
+        url : "${ctx}/kube/vm/kubeVm/uploadToFile",
+        data : formData,
+        processData : false,
+        contentType : false,
+        success : function(data){
+            if (data=="error") {
+                alert("文件提交失败!");
+            }else{
+                $("input[name='userUrl']").val(data);
+                alert("文件上传成功!");
+            }}
+    });
+
+});
+
+
 </script>

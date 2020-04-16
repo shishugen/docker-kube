@@ -43,7 +43,7 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
 						@Column(name="class_name", label="班名称", isQuery=false)
 				}
 		),
-		@JoinTable(type=Type.LEFT_JOIN, entity= KubeCourseImages.class, attrName="kubeCourseImages", alias="c3",
+/*		@JoinTable(type=Type.LEFT_JOIN, entity= KubeCourseImages.class, attrName="kubeCourseImages", alias="c3",
 						on="c3.course_id = c1.id", columns={
 				}
 		),
@@ -53,7 +53,7 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
 				@Column(name="memory", attrName="memory", label="memory单位(G)", isQuery=false),
 				@Column(name="repository_name", attrName="repositoryName", label="仓库名", queryType=QueryType.LIKE),
 				}
-		),
+		),*/
 	}, orderBy="a.update_date DESC"
 )
 public class KubeApply extends DataEntity<KubeApply> {
@@ -69,6 +69,11 @@ public class KubeApply extends DataEntity<KubeApply> {
 	private KubeClass kubeClass;
 	private KubeCourseImages kubeCourseImages;
 	private KubeImages kubeImages;
+
+	//0:上课
+	public final static Integer CLASS_APPLY = 0;
+	//1：个人
+	public final static Integer ONE_APPLY = 1;
 
 
 	
@@ -164,9 +169,7 @@ public class KubeApply extends DataEntity<KubeApply> {
 		this.kubeImages = kubeImages;
 	}
 
-	public enum ApplyTyep{
-		CLASS_APPLY, ONE_APPLY;
-	}
+
 
 
 
