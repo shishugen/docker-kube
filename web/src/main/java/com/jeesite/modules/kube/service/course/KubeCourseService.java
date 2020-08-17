@@ -61,7 +61,9 @@ public class KubeCourseService extends CrudService<KubeCourseDao, KubeCourse> {
 		String courseId = kubeCourse.getId();
 
 		if(StringUtils.isNoneBlank(kubeCourse.getImagesIds())){
-			List<KubeCourseImages> list = kubeCourseImagesService.findList(new KubeCourseImages(courseId));
+			KubeCourseImages kubeCourseImages1 = new KubeCourseImages();
+			kubeCourseImages1.setCourseId(courseId);
+			List<KubeCourseImages> list = kubeCourseImagesService.findList(kubeCourseImages1);
 			list.stream().parallel().forEach(a->{
 				kubeCourseImagesService.delete(a);
 			});
