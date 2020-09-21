@@ -3,6 +3,7 @@ import java.io.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -37,11 +38,12 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 @RequestMapping(value = "${adminPath}/kube/vm/upload")
 public class SSHRemoteCall {
-
     @Autowired
     private KubeVmService kubeVmService;
     // 私有的对象
-    private static SSHRemoteCall sshRemoteCall;
+    private SSHRemoteCall sshRemoteCall;
+
+    public static Map<String,Session> sshMap = new ConcurrentHashMap<>();
 
     /**
      * 私有的构造方法
@@ -49,8 +51,10 @@ public class SSHRemoteCall {
     public SSHRemoteCall() {
     }
 
+
+
     // 懒汉式,线程不安全,适合单线程
-    public static SSHRemoteCall getInstance() {
+    public SSHRemoteCall getInstance() {
         if (sshRemoteCall == null) {
             sshRemoteCall = new SSHRemoteCall();
         }
@@ -58,7 +62,7 @@ public class SSHRemoteCall {
     }
 
     // 懒汉式,线程安全,适合多线程
-    public static synchronized SSHRemoteCall getInstance2() {
+    public  synchronized SSHRemoteCall getInstance2() {
         if (sshRemoteCall == null) {
             sshRemoteCall = new SSHRemoteCall();
         }
@@ -70,11 +74,18 @@ public class SSHRemoteCall {
 
     private static String ipAddress = "192.168.103.235";// ip地址
     private static String userName = "root";// 账号
-    private static String password = "123456";// 密码
-
+    //private static String password = "xykube@123";// 密码
+    private static String password = "xykube@123";// 密码
     private Session session;// JSCH session
     private boolean logined = false;// 是否登陆
 
+/*    static {
+        boolean isWindows =  System.getProperty("os.name").toLowerCase().contains("win");
+        if(isWindows){
+            password = "xykube@123";
+        }
+
+    }*/
     /**
      * 构造方法,可以直接使用DEFAULT_PORT
      *
@@ -107,7 +118,15 @@ public class SSHRemoteCall {
      *
      * @throws Exception
      */
-    public void sshRemoteCallLogin(String ipAddress, String userName, String password) throws Exception {
+    public Session sshRemoteCallLogin(String ipAddress) throws Exception {
+        return sshRemoteCallLogin(ipAddress, userName, password);
+    }
+    /**
+     * 远程登陆
+     *
+     * @throws Exception
+     */
+    public Session sshRemoteCallLogin(String ipAddress, String userName, String password) throws Exception {
         // 如果登陆就直接返回
        /* if (logined) {
             return;
@@ -137,8 +156,9 @@ public class SSHRemoteCall {
             // 设置登陆状态为false
             logined = false;
             throw new Exception(
-                    "主机登录失败, IP = " + ipAddress + ", USERNAME = " + userName + ", Exception:" + e.getMessage());
+                    "主机登录失败, IP = " + ipAddress + ", USERNAME = " + userName + ", Exception:" + e.getMessage()+"password ="+password);
         }
+        return session;
     }
 
     /**
@@ -159,7 +179,7 @@ public class SSHRemoteCall {
      * @param command
      * @throws IOException
      */
-    public String execCommand(String command) throws IOException {
+    public String execCommand(String command,Session session2) throws IOException {
         InputStream in = null;// 输入流(读)
         Channel channel = null;// 定义channel变量
         String processDataStream = "";
@@ -168,7 +188,7 @@ public class SSHRemoteCall {
             if (command != null) {
                 // 打开channel
                 //说明：exec用于执行命令;sftp用于文件处理
-                channel = session.openChannel("exec");
+                channel = session2.openChannel("exec");
                 // 设置command
                 ((ChannelExec) channel).setCommand(command);
                 // channel进行连接
@@ -179,12 +199,11 @@ public class SSHRemoteCall {
                 processDataStream = processDataStream(in);
 
 
-
-
                 // 打印相关的命令
                 System.out.println("1、打印相关返回的命令: " + processDataStream);
             }
         } catch (JSchException e) {
+
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -244,7 +263,7 @@ public class SSHRemoteCall {
             // 将文件进行上传(sftp协议)
             // 将本地文件名为src的文件上传到目标服务器,目标文件名为dst,若dst为目录,则目标文件名将与src文件名相同.
             // 采用默认的传输模式:OVERWRITE
-           // channelSftp.put(new FileInputStream(file), directory, ChannelSftp.OVERWRITE);
+            // channelSftp.put(new FileInputStream(file), directory, ChannelSftp.OVERWRITE);
             channelSftp.put(new FileInputStream(file), directory, ChannelSftp.OVERWRITE);
             // 切断远程连接
             channelSftp.exit();
@@ -274,11 +293,11 @@ public class SSHRemoteCall {
             // 远程连接
             channelSftp.connect();
             // 创建一个文件名称问uploadFile的文件
-          //  File file = new File(uploadFile);
+            //  File file = new File(uploadFile);
             // 将文件进行上传(sftp协议)
             // 将本地文件名为src的文件上传到目标服务器,目标文件名为dst,若dst为目录,则目标文件名将与src文件名相同.
             // 采用默认的传输模式:OVERWRITE
-           // channelSftp.put(new FileInputStream(file), directory, ChannelSftp.OVERWRITE);
+            // channelSftp.put(new FileInputStream(file), directory, ChannelSftp.OVERWRITE);
             channelSftp.put(inputStream, directory, ChannelSftp.OVERWRITE);
             // 切断远程连接
             channelSftp.exit();
@@ -349,7 +368,7 @@ public class SSHRemoteCall {
      */
     public JSONArray listFiles(String directory) throws JSchException, SftpException {
         ChannelSftp channelSftp = (ChannelSftp) session.openChannel("sftp");
-           // 远程连接
+        // 远程连接
         channelSftp.connect();
         // 显示目录信息
         Vector ls = channelSftp.ls(directory);
@@ -370,7 +389,7 @@ public class SSHRemoteCall {
         }
 
 
-       // System.out.println("5、" + ls);
+        // System.out.println("5、" + ls);
         // 切断连接
         channelSftp.exit();
 
@@ -395,7 +414,7 @@ public class SSHRemoteCall {
 
     @RequestMapping("/uploadToFile")
     @ResponseBody
-    public String uploadToUser(@RequestParam("file") MultipartFile file,@RequestParam("vmIp")String vmIp, HttpServletRequest req, io.swagger.models.Model model) {
+    public String uploadToUser(@RequestParam("file") MultipartFile file,@RequestParam("vmIp")String vmIp, HttpServletRequest req, Model model) {
 
         String fileName = file.getOriginalFilename();
         if (fileName.indexOf("\\") != -1) {
@@ -407,14 +426,32 @@ public class SSHRemoteCall {
             sshRemoteCall.uploadFile(file1,file.getInputStream());
 
 
-       // String command = "kubectl cp "+file1+" "+vmName+":/home/";
+            // String command = "kubectl cp "+file1+" "+vmName+":/home/";
 
-      //  SSHRemoteCall.getInstance().execCommand(command);
+            //  SSHRemoteCall.getInstance().execCommand(command);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return ""; // 返回文件地址
     }
+
+    private  Session getSession(String containerId, String hostIp) throws Exception {
+        Session session2 = null;
+        if(!sshMap.containsKey(containerId)){
+            Session session = this.getInstance2().sshRemoteCallLogin(hostIp, userName, password);
+            sshMap.put(containerId,session);
+            session2 = session;
+        }else{
+            session2 = sshMap.get(containerId);
+            if(!session2.isConnected()){
+                Session session = this.getInstance2().sshRemoteCallLogin(hostIp, userName, password);
+                sshMap.put(containerId,session);
+                session2 = session;
+            }
+        }
+        return session2;
+    }
+
     @ResponseBody
     @RequestMapping("/getFileDirectory")
     public JSONArray getFileDirectory(HttpServletRequest request) throws Exception, JSchException {
@@ -422,8 +459,8 @@ public class SSHRemoteCall {
         String id = request.getParameter("id");
         String hostIp = request.getParameter("hostIp");
         String containerId = request.getParameter("containerId");
-
-        SSHRemoteCall.getInstance().sshRemoteCallLogin(hostIp, userName, password);
+        SSHRemoteCall sshRemoteCall = null;
+        Session session2 = this.getSession(containerId, hostIp);
         System.out.println(hostIp+"-------"+id+"----"+containerId);
         String fileDirectory ="";
         String isParent = " ^d";
@@ -432,7 +469,7 @@ public class SSHRemoteCall {
             for (int j = 0; j <2 ; j++) {
                 String command = "docker exec  "+ containerId+ " ls -l |grep "+isParent;
                 System.out.println(command);
-                String files = SSHRemoteCall.getInstance().execCommand(command);
+                String files = this.execCommand(command,session2);
                 String[] split = files.split(",");
                 for (int i = 0; i <split.length ; i++) {
                     String fileName = split[i].substring(split[i].lastIndexOf(" "), split[i].length());
@@ -451,7 +488,7 @@ public class SSHRemoteCall {
             for (int j = 0; j <2 ; j++) {
                 String command = "docker exec  " + containerId + " ls " + fileDirectory + " ls -l | grep "+isParent;
                 System.out.println(command);
-                String fileDirectorys = SSHRemoteCall.getInstance().execCommand(command);
+                String fileDirectorys = this.execCommand(command,session2);
                 if(StringUtils.isEmpty(fileDirectorys)){
                     isParent = " ^-";
                     continue;
@@ -469,9 +506,8 @@ public class SSHRemoteCall {
                 isParent = " ^-";
             }
         }
-       //  SSHRemoteCall.getInstance().closeSession();
+        //  SSHRemoteCall.getInstance().closeSession();
         return jSONArray;
-
     }
 
 
@@ -498,7 +534,7 @@ public class SSHRemoteCall {
             //获得后缀名
             String oriFileName = mf.getOriginalFilename();
             // 1、首先远程连接ssh
-            SSHRemoteCall.getInstance().sshRemoteCallLogin(ipAddress, userName, password);
+            // SSHRemoteCall.getInstance().sshRemoteCallLogin(ipAddress, userName, password);
             // 打印信息
             System.out.println("0、连接,ip地址: " + ipAddress + ",账号: " + userName + ",连接成功....."+"-----文件名--"+oriFileName);
 
@@ -508,68 +544,64 @@ public class SSHRemoteCall {
 
             String command = "kubectl cp "+file+" "+vmName+":/home/";
 
-            SSHRemoteCall.getInstance().execCommand(command);
+            //  SSHRemoteCall.getInstance().execCommand(command);
 
-          }catch (IOException e) {
+        }catch (IOException e) {
             e.printStackTrace();
         }
 
     }
 
-    /**
-     * 创建文件夹
-     * */
-    public static void createFolder(){
-        SSHRemoteCall instance = SSHRemoteCall.getInstance();
 
-    }
 
 
 
 
 
     public static void main(String[] args) {
-        // 连接到指定的服务器
-        try {
-            SSHRemoteCall.getInstance().sshRemoteCallLogin(ipAddress, userName, password);
 
-            JSONArray jSONArray = new JSONArray();
-            String isParent = " ^d";
-            //第一次进来
-
-            String cid = "0b4d03bba8ba";
-            for (int j = 0; j <2 ; j++) {
-                String command = "docker exec  "+ cid+ " ls -l |grep "+isParent;
-                System.out.println(command);
-                String files = SSHRemoteCall.getInstance().execCommand(command);
-                String[] split = files.split(",");
-                for (int i = 0; i <split.length ; i++) {
-                    String fileName = split[i].substring(split[i].lastIndexOf(" "), split[i].length());
-                    JSONObject json = new JSONObject();
-                    json.put("name", fileName);
-                    json.put("id", ( "//" + fileName.trim()).replaceAll("//", "/"));
-                    json.put("name", fileName);
-                    // System.out.println((fileDirectory.trim() + "/" + fileName.trim()).replaceAll("//", "/"));
-                    json.put("isParent", isParent.equals(" ^d") ? true : false);
-                    jSONArray.add(json);
-                }
-                isParent = " ^-";
-            }
-
-            System.out.println(jSONArray);
-            // 2、执行相关的命令
-            // 查看目录信息
-            // String command = "ls /home/hadoop/package ";
-            // 查看文件信息
-            // String command = "cat /home/hadoop/package/test ";
-            // 查看磁盘空间大小
-            // String command = "df -lh ";
-            // 查看cpu的使用情况
-            // String command = "top -bn 1 -i -c ";
-            // 查看内存的使用情况
-         //   String command = "kubectl cp /root/centos/wget-log fba45d0788a54336b45e13a6a4ebf5de-bd54dc4d7-47544:/usr/";
+        System.out.println(password);
+//        // 连接到指定的服务器
+//        try {
+//            SSHRemoteCall.getInstance().sshRemoteCallLogin(ipAddress, userName, password);
+//
+//            JSONArray jSONArray = new JSONArray();
+//            String isParent = " ^d";
+//            //第一次进来
+//
+//            String cid = "0b4d03bba8ba";
+//            for (int j = 0; j <2 ; j++) {
+//                String command = "docker exec  "+ cid+ " ls -l |grep "+isParent;
+//                System.out.println(command);
+//                String files = SSHRemoteCall.getInstance().execCommand(command);
+//                String[] split = files.split(",");
+//                for (int i = 0; i <split.length ; i++) {
+//                    String fileName = split[i].substring(split[i].lastIndexOf(" "), split[i].length());
+//                    JSONObject json = new JSONObject();
+//                    json.put("name", fileName);
+//                    json.put("id", ( "//" + fileName.trim()).replaceAll("//", "/"));
+//                    json.put("name", fileName);
+//                    // System.out.println((fileDirectory.trim() + "/" + fileName.trim()).replaceAll("//", "/"));
+//                    json.put("isParent", isParent.equals(" ^d") ? true : false);
+//                    jSONArray.add(json);
+//                }
+//                isParent = " ^-";
+//            }
+//
+//            System.out.println(jSONArray);
+        // 2、执行相关的命令
+        // 查看目录信息
+        // String command = "ls /home/hadoop/package ";
+        // 查看文件信息
+        // String command = "cat /home/hadoop/package/test ";
+        // 查看磁盘空间大小
+        // String command = "df -lh ";
+        // 查看cpu的使用情况
+        // String command = "top -bn 1 -i -c ";
+        // 查看内存的使用情况
+        //   String command = "kubectl cp /root/centos/wget-log fba45d0788a54336b45e13a6a4ebf5de-bd54dc4d7-47544:/usr/";
         //    SSHRemoteCall.getInstance().execCommand(command);
-          //  SSHRemoteCall.getInstance().execCommand("mkdir /hoem/ssg3");
+        //  SSHRemoteCall.getInstance().execCommand("mkdir /hoem/ssg3");
 
 
              /*   // 4、下载文件
@@ -587,13 +619,14 @@ public class SSHRemoteCall {
             String lsDirectory = "/home/hadoop/package";
             SSHRemoteCall.getInstance().listFiles(lsDirectory);*/
 
-            // 7、关闭连接
-            SSHRemoteCall.getInstance().closeSession();
-        } catch (Exception e) {
-            // 打印错误信息
-            System.err.println("远程连接失败......");
-            e.printStackTrace();
-        }
+        // 7、关闭连接
+        //  SSHRemoteCall.getInstance().closeSession();
+        // } catch (Exception e) {
+        // 打印错误信息
+        System.err.println("远程连接失败......");
+
+
     }
+
 
 }

@@ -1,46 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<parent>
 		<groupId>com.jeesite</groupId>
 		<artifactId>jeesite-parent</artifactId>
 		<version>4.1.7-SNAPSHOT</version>
 		<relativePath>../parent/pom.xml</relativePath>
 	</parent>
-	
+
 	<artifactId>jeesite-web</artifactId>
 	<packaging>war</packaging>
-	
+
 	<name>JeeSite Web</name>
 	<url>http://jeesite.com</url>
 	<inceptionYear>2013-Now</inceptionYear>
-	
+
 	<properties>
-		
+
 		<finalName>web</finalName><!-- war包的名称 -->
 		<start-class>com.jeesite.modules.Application</start-class>
-		
+
 		<!-- environment setting -->
 		<eclipse-plugin-download-sources>false</eclipse-plugin-download-sources>
 		<eclipse-plugin-download-javadocs>false</eclipse-plugin-download-javadocs>
-		
+
 		<!-- docker service -->
 		<docker.registryUrl>http://192.168.56.102:2375</docker.registryUrl>
 		<docker.imageName>${project.groupId}/${project.artifactId}:4.1</docker.imageName>
-		
+
 	</properties>
 
 	<dependencies>
-		
+
 		<!-- 核心模块 -->
 		<dependency>
 			<groupId>com.jeesite</groupId>
 			<artifactId>jeesite-module-core</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-		
+
 		<!-- 在线API文档 -->
 		<dependency>
 			<groupId>com.jeesite</groupId>
@@ -53,14 +53,14 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<!-- Office在线预览 -->
 		<dependency>
 			<groupId>com.jeesite</groupId>
 			<artifactId>jeesite-module-weboffice</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-		
+
 		<!-- 文件管理 -->
 		<dependency>
 			<groupId>com.jeesite</groupId>
@@ -71,7 +71,7 @@
 		<dependency>
 			<groupId>io.fabric8</groupId>
 			<artifactId>kubernetes-client</artifactId>
-			<version>4.9.0</version><!-- 对应k8s的1.9版本-->
+			<version>4.9.0</version>
 		</dependency>
 
 		<dependency>
@@ -86,6 +86,25 @@
 			<artifactId>harbor-java-client</artifactId>
 			<version>0.0.1</version>
 		</dependency>
+
+		<!--	<dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>spring-cloud-starter-kubernetes</artifactId>
+            <version>0.1.6</version>
+            <type>pom</type>
+        </dependency>-->
+
+
+		<!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-kubernetes -->
+		<!--<dependency>-->
+		<!--<groupId>org.springframework.cloud</groupId>-->
+		<!--<artifactId>spring-cloud-starter-kubernetes</artifactId>-->
+		<!--<version>1.1.5.RELEASE</version>-->
+		<!--</dependency>-->
+
+
+
+
 
 		<!--spring quartz依赖-->
 		<dependency>
@@ -111,18 +130,20 @@
 			<type>pom</type>
 		</dependency>
 		<dependency>
-			<groupId>repository.com.jcraft</groupId>
+			<groupId>com.jcraft</groupId>
 			<artifactId>jsch</artifactId>
-			<version>0.1.53</version>
+			<version>0.1.55</version>
+
 		</dependency>
 
+
 		<!-- Spring Boot -->
-<!--		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-tomcat</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		-->
+		<!--		<dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+                -->
 		<!-- 自定义jar依赖包演示
 		<dependency>
 			<groupId>com.jeesite</groupId>
@@ -131,14 +152,30 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/test-core-1.0.jar</systemPath>
 		</dependency> -->
-		
+		<dependency>
+			<groupId>commons-net</groupId>
+			<artifactId>commons-net</artifactId>
+			<version>3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.ethz.ganymed</groupId>
+			<artifactId>ganymed-ssh2</artifactId>
+			<version>build210</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.10.2</version>
+		</dependency>
+
 	</dependencies>
-	
+
 	<build>
 		<finalName>${finalName}</finalName>
 		<outputDirectory>${project.basedir}/src/main/webapp/WEB-INF/classes/</outputDirectory>
 		<plugins>
-			
+
 			<!-- Spring Boot -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -148,7 +185,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 			</plugin> -->
-			
+
 			<!-- 打包插件, war包名称不带版本号 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -163,7 +200,7 @@
 					</archive>
 				</configuration>
 			</plugin>
-			
+
 			<!-- Eclipse 插件 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -176,10 +213,10 @@
 					<jeeversion>6.0</jeeversion>
 				</configuration>
 			</plugin>
-			
+
 		</plugins>
 	</build>
-	
+
 	<profiles>
 		<!-- Docker 插件 -->
 		<profile>
@@ -211,22 +248,22 @@
 			</build>
 		</profile>
 	</profiles>
-	
-	<developers>  
+
+	<developers>
 		<developer>
 			<id>thinkgem</id>
 			<name>WangZhen</name>
 			<email>thinkgem at 163.com</email>
 			<roles><role>Project lead</role></roles>
-			<timezone>+8</timezone>  
+			<timezone>+8</timezone>
 		</developer>
 	</developers>
-	
+
 	<organization>
 		<name>JeeSite</name>
 		<url>http://jeesite.com</url>
 	</organization>
-	
+
 	<repositories>
 		<repository>
 			<id>aliyun-repos</id>
@@ -234,8 +271,8 @@
 			<releases><enabled>true</enabled></releases>
 			<snapshots><enabled>false</enabled></snapshots>
 		</repository>
-        <repository>
-		    <id>sonatype-repos-s</id>
+		<repository>
+			<id>sonatype-repos-s</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 			<releases><enabled>false</enabled></releases>
 			<snapshots><enabled>true</enabled></snapshots>
@@ -247,5 +284,5 @@
 			<url>https://maven.aliyun.com/repository/public</url>
 		</pluginRepository>
 	</pluginRepositories>
-	
+
 </project>

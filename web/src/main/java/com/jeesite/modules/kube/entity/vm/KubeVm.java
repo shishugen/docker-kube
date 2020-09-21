@@ -265,4 +265,22 @@ public class KubeVm extends DataEntity<KubeVm> {
 	public void setType(Integer type) {
 		this.type = type;
 	}
+
+	@Override
+	public String toString() {
+		return "KubeVm{" +
+				"vmName='" + vmName + '\'' +
+				", vmStatus=" + vmStatus +
+				", type=" + type +
+				", vmIp='" + vmIp + '\'' +
+				", hostIp='" + hostIp + '\'' +
+				", namespace='" + namespace + '\'' +
+				", deploymentName='" + deploymentName + '\'' +
+				", imagesId='" + imagesId + '\'' +
+				", userId=" + userId +
+				", vmStartDate=" + vmStartDate +
+				", applyId='" + applyId + '\'' +
+				", containerId='" + containerId + '\'' +
+				'}';
+	}
 }

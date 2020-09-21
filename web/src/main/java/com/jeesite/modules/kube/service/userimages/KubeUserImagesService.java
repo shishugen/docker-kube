@@ -3,6 +3,7 @@
  */
 package com.jeesite.modules.kube.service.userimages;
 
+import java.io.File;
 import java.util.List;
 
 import com.jeesite.modules.kube.core.KubeConfig;
@@ -78,10 +79,10 @@ public class KubeUserImagesService extends CrudService<KubeUserImagesDao, KubeUs
 
 	@Transactional(readOnly=false)
     public void createVm(KubeUserImages kubeUserImages) {
-		 String repositoryNam =KubeConfig.HARBOR_REGISTRY_URL+"/"+kubeUserImages.getRepository()+
+		 String repositoryNam =KubeConfig.HARBOR_REGISTRY_URL+File.separator+kubeUserImages.getRepository()+
 				 ":"+kubeUserImages.getVersion();
-		String cpu = "1";
-		String memory = "1";
+		String cpu = "500";
+		String memory = "500";
 		Integer number = 1;
 		Integer type = 1;
 		String applyId = kubeUserImages.getId();

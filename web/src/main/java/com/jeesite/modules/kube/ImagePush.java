@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class ImagePush {
 
-    static  RestTemplate template = new RestTemplate();
+    static RestTemplate template = new RestTemplate();
 
     public static void main(String[] args) {
 
@@ -31,6 +31,4 @@ public class ImagePush {
 
         System.out.println(bigDecimal);
     }
-
-
 }

@@ -5,7 +5,6 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import sun.plugin2.gluegen.runtime.CPU;
 
 import java.util.List;
 import java.util.Map;

@@ -1,13 +1,20 @@
 package com.jeesite.modules.kube.core;
 
-import com.madailicai.devops.harbor.HarborClient;
-import com.madailicai.devops.harbor.model.HarborResponse;
-import com.madailicai.devops.harbor.model.Project;
-import com.madailicai.devops.harbor.model.ProjectAndRepoNum;
+
+import com.alibaba.fastjson.JSONObject;
+import com.beust.jcommander.internal.Lists;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.*;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @ClassName HarborClient
@@ -17,51 +24,34 @@ import java.util.List;
  */
 public class KubeHarborClient {
 
-    public static HarborClient getHarbrClient(){
-        HarborClient harborClient = null;
-        try {
-        //1) Creat harbor client
-             harborClient = new HarborClient(KubeConfig.HARBOR_REGISTRY_URL);
-
-          //2) login
-            harborClient.login(KubeConfig.REGISTRY_USER_NAME, KubeConfig.HARBOR_REGISTRY_PASSWORD);
-            System.out.println(harborClient);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
 
-        return harborClient;
+    public static void main(String[] args) throws  Exception {
+        KubeHarborClient kubeHarborClient = new KubeHarborClient();
+
+        kubeHarborClient.loginTest();
+
     }
+    public  static JSONObject login(String url, MultiValueMap<String, String> params){
 
-    public static void main(String[] args) throws  Exception{
-        RestTemplate template = new RestTemplate();
-
-        List forObject = template.getForObject("http://192.168.103.227/api/projects", List.class);
-        System.out.println("h所有项目:"+forObject.get(0));
-
-
-      //  List forObjec = template.getForObject("http://192.168.103.236/api/repositories?project_id=2", List.class);
-      //  System.out.println("harbor状态:"+forObjec);
-        //fetch("http://192.168.103.236/api/projects/2/summary", {"credentials":"include","headers":{"accept":"application/json","accept-language":"zh-CN,zh;q=0.9","cache-control":"no-cache","content-type":"application/json","pragma":"no-cache"},"referrer":"http://192.168.103.236/harbor/projects/2/summary","referrerPolicy":"no-referrer-when-downgrade","body":null,"method":"GET","mode":"cors"}); ;
-       // fetch("http://192.168.103.236/api/repositories?page=1&page_size=15&project_id=2", {"credentials":"include","headers":{"accept":"application/json","accept-language":"zh-CN,zh;q=0.9","cache-control":"no-cache","content-type":"application/json","pragma":"no-cache"},"referrer":"http://192.168.103.236/harbor/projects/2/repositories","referrerPolicy":"no-referrer-when-downgrade","body":null,"method":"GET","mode":"cors"}); ;
-       // fetch("http://192.168.103.236/api/systeminfo", {"credentials":"include","headers":{"accept":"application/json","accept-language":"zh-CN,zh;q=0.9","cache-control":"no-cache","content-type":"application/json","pragma":"no-cache"},"referrer":"http://192.168.103.236/harbor/projects/2/repositories","referrerPolicy":"no-referrer-when-downgrade","body":null,"method":"GET","mode":"cors"}); ;
-       // fetch("http://192.168.103.236/api/repositories?page=1&page_size=15&project_id=2", {"credentials":"include","headers":{"accept":"application/json","accept-language":"zh-CN,zh;q=0.9","cache-control":"no-cache","content-type":"application/json","pragma":"no-cache"},"referrer":"http://192.168.103.236/harbor/projects/2/repositories","referrerPolicy":"no-referrer-when-downgrade","body":null,"method":"GET","mode":"cors"});
+        //将请求头部和参数合成一个请求
+       // HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(params, headers);
+        //执行HTTP请求，将返回的结构使用JSONObject类格式化
+       // ResponseEntity<JSONObject> response = client.exchange(url, method, requestEntity, JSONObject.class);
+      //  System.out.println(response);
 
 
+        return  null;
+    }
+    public void loginTest(){
+        //http://192.168.103.236/harbor/sign-in?login_username=admin&login_password=Harbor12345
+        String url= "http://192.168.103.236/c/login";
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("principal","admin");
+        params.add("password","Harbor12345");
+        JSONObject result = login(url, params);
+        System.out.println(result);
 
-
- /*       HarborResponse harborResponse = harbrClient.checkProject("centos-test");
-
-        System.out.println(harborResponse);
-
-        Project project = new Project();
-        project.setName("proname");
-        project.setPublic(false);
-        HarborResponse project1 = harbrClient.createProject(project);
-        System.out.println(project1);
-        //  ProjectAndRepoNum statistics = harbrClient.getStatistics();
-       // System.out.println(statistics);
-*/
     }
 }
+

@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Image;
 import com.jeesite.modules.kube.core.DockerClinet;
+import com.jeesite.modules.kube.entity.vm.KubeVm;
 import com.jeesite.modules.kube.utlis.DateUtlis;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,6 +137,17 @@ public class KubeImagesController extends BaseController {
 	public String delete(KubeImages kubeImages) {
 		kubeImagesService.delete(kubeImages);
 		return renderResult(Global.TRUE, text("删除本地镜像成功！"));
+	}
+
+	/**
+	 * 创建pod
+	 */
+	@RequiresPermissions("kube:image:kubeImages:edit")
+	@RequestMapping(value = "createPod")
+	public String createPod(KubeImages kubeImages,Model model) {
+		KubeVm pod = kubeImagesService.createPod(kubeImages);
+		model.addAttribute("kubeVm", pod);
+		return "modules/kube/vm/kubeVmForm";
 	}
 
 }

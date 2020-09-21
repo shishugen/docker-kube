@@ -4,6 +4,7 @@
 package com.jeesite.modules.kube.service.vm;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -105,7 +106,6 @@ public class KubeVmService extends CrudService<KubeVmDao, KubeVm> {
 	@Override
 	@Transactional(readOnly = false)
 	public void delete(KubeVm kubeVm) {
-		KubeClinet.dalDeploment(kubeVm.getDeploymentName());
 		super.delete(kubeVm);
 	}
 
@@ -122,7 +122,21 @@ public class KubeVmService extends CrudService<KubeVmDao, KubeVm> {
 	 **/
     @Transactional(readOnly = false)
 	public void saveContainer(KubeVm kubeVm) {
-		DockerClient dockerClient = DockerClinet.getDockerClient(kubeVm.getHostIp());
+        String hostIp1 = kubeVm.getHostIp();
+      /*  String HIp= "";
+         switch (hostIp1){
+             case "10.150.1.11" :
+                 HIp =  "123.125.252.133";
+             break;
+             case "10.150.1.12" :
+                 HIp =  "123.125.252.134";
+                 break;
+             case "10.150.1.13" :
+                 HIp =  "123.125.252.135";
+                 break;
+         }*/
+
+        DockerClient dockerClient = DockerClinet.getDockerClient(hostIp1);
 		String vmName = kubeVm.getVmName();
         double version = 1.0;
         KubeUserImages kubeUserImage = null;
@@ -144,10 +158,10 @@ public class KubeVmService extends CrudService<KubeVmDao, KubeVm> {
             authConfig.withPassword(KubeConfig.REGISTRY_PASSWORD);
             String containerId =kubeVm.getContainerId();
             String hostIp = kubeVm.getHostIp(); //节点
-            String repository =KubeConfig.REGISTRY_REPOSITORY_IP+KubeConfig.REGISTRY_REPOSITORY_PROJECT;
+            String repository =KubeConfig.REGISTRY_REPOSITORY_IP+File.separator+KubeConfig.REGISTRY_REPOSITORY_PROJECT;
             String loginName = UserUtils.getUser().getLoginCode();
             System.out.println(repository+":"+version);
-            String backImagesId = dockerClient.commitCmd(containerId).withRepository(repository+"/"+loginName).withTag(version+"").exec();
+            String backImagesId = dockerClient.commitCmd(containerId).withRepository(repository+File.separator+loginName).withTag(version+"").exec();
 
             //保存
             KubeUserImages userImages = new KubeUserImages();
@@ -160,12 +174,12 @@ public class KubeVmService extends CrudService<KubeVmDao, KubeVm> {
             userImages.setRepositoryHost(KubeConfig.REGISTRY_REPOSITORY_IP);
             userImages.setWorkNodeIp(hostIp);
             userImages.setUserId(UserUtils.getUser().getId());
-            userImages.setRepository(KubeConfig.REGISTRY_REPOSITORY_PROJECT+"/"+loginName);
+            userImages.setRepository(KubeConfig.REGISTRY_REPOSITORY_PROJECT+File.separator+loginName);
             kubeUserImagesService.save(userImages);
             PushImage pushImage = new PushImage();
 
             //push
-            dockerClient.pushImageCmd(repository+"/"+loginName).withTag(version+"").withAuthConfig(authConfig).exec(pushImage ).awaitSuccess();
+            dockerClient.pushImageCmd(repository+File.separator+loginName).withTag(version+"").withAuthConfig(authConfig).exec(pushImage ).awaitSuccess();
             System.out.println("OK");
           //  Boolean success = pushImage.isSuccess();
           /*  if(success && kubeUserImage != null){

@@ -4,12 +4,12 @@
 #======================================#
 
 # 产品或项目名称、软件开发公司名称
-productName: JeeSite Demo
+productName: 容器 Demo
 companyName: ThinkGem
 
 # 产品版本、版权年份
-productVersion: V4.1
-copyrightYear: 2018
+productVersion: V1.0
+copyrightYear: 2019
 
 #是否演示模式
 demoMode: false
@@ -20,7 +20,7 @@ demoMode: false
 
 server:
 
-  port: 8980
+  port: 8080
   servlet:
     context-path: /js
   tomcat:
@@ -52,7 +52,7 @@ jdbc:
 #  # Sql Server 数据库配置
 #  type: mssql
 #  driver: net.sourceforge.jtds.jdbc.Driver
-#  url: jdbc:jtds:sqlserver://127.0.0.1:1433/jeesite
+#  url: jdbc:jtds:sqlserver://127.0.0.1:1433/jeesitels
 #  username: jeesite
 #  password: jeesite
 #  testSql: SELECT 1
@@ -144,8 +144,6 @@ jdbc:
 #========== Spring settings ===========#
 #======================================#
 
-spring:
-  
   # 应用程序名称
   application:
     name: jeesite-web

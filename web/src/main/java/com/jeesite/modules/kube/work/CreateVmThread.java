@@ -79,7 +79,7 @@ public class CreateVmThread extends  Thread{
         KubernetesClient kubeclinet = KubeClinet.getKubeclinet();
             synchronized (this){
                 try {
-                    String deploymentName = UUID.randomUUID().toString().replaceAll("-", "");
+                    String deploymentName = UUID.randomUUID().toString().replaceAll("-", "").substring(2,8);
                     Deployment deployment = new Deployment();
                     DeploymentSpec deploymentSpec = new DeploymentSpec();
                     ObjectMeta metadata0 = new ObjectMeta();
@@ -104,10 +104,10 @@ public class CreateVmThread extends  Thread{
                     container.setImage(imagesName);
                     ResourceRequirements resources = new ResourceRequirements();
                     Map<String, Quantity> requestsMap = new HashMap<>();
-                    requestsMap.put("cpu",new Quantity(cpu,"G"));
+                    requestsMap.put("cpu",new Quantity(cpu,"Mi"));
                     requestsMap.put("memory",new Quantity(memory,"Mi"));
                     resources.setRequests(requestsMap);
-                    container.setResources(resources);
+                  //  container.setResources(resources);
                     List<String> commandList = new ArrayList<>();
                     commandList.add("/usr/sbin/sshd");
                     commandList.add("-D");

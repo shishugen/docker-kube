@@ -9,12 +9,17 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.common.io.Files;
 import com.jeesite.modules.kube.core.KubeClinet;
 import com.jeesite.modules.kube.work.SyncCreateVmThread;
+import com.jeesite.modules.sys.entity.User;
 import com.jeesite.modules.sys.utils.UserUtils;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,11 +31,16 @@ import com.jeesite.common.entity.Page;
 import com.jeesite.common.web.BaseController;
 import com.jeesite.modules.kube.entity.vm.KubeVm;
 import com.jeesite.modules.kube.service.vm.KubeVmService;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
+import org.yaml.snakeyaml.reader.StreamReader;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 虚拟机Controller
@@ -45,6 +55,8 @@ public class KubeVmController extends BaseController {
 	private KubeVmService kubeVmService;
 
 	private static final String DEFAULT_NAMESPACE = "default";
+
+
 	
 	/**
 	 * 获取数据
@@ -63,7 +75,12 @@ public class KubeVmController extends BaseController {
 		if(!"system".equals(UserUtils.getUser().getUserCode())){
 			kubeVm.setUserId(UserUtils.getUser());
 		}
-		List<KubeVm> list = kubeVmService.findList(kubeVm);
+        User user = UserUtils.get("teacher_wckl");
+        int teacher = user.getRoleList().stream().filter(s -> s.getRoleCode().equals("TEACHER")).collect(Collectors.toList()).size();
+        User user1 = UserUtils.get("user10_ijgl");
+        int teacher2 = user1.getRoleList().stream().filter(s -> s.getRoleCode().equals("TEACHER")).collect(Collectors.toList()).size();
+
+        List<KubeVm> list = kubeVmService.findList(kubeVm);
 		model.addAttribute("kubeVmList", list);
 		return "modules/kube/vm/kubeVmList";
 	}
@@ -92,6 +109,30 @@ public class KubeVmController extends BaseController {
 		model.addAttribute("kubeVm", kubeVm);
 		return "modules/kube/vm/kubeVmForm";
 	}
+
+	/**
+	 * 查看编辑表单
+	 */
+	@RequiresPermissions("kube:vm:kubeVm:view")
+	@RequestMapping(value = "testUrl")
+	public String testUrl(KubeVm kubeVm, Model model) throws Exception {
+        URL url = new URL("http://123.125.252.133:32222/ssh/host/192.168.77.53");
+        InputStream in =url.openStream();
+        InputStreamReader isr = new InputStreamReader(in);
+        BufferedReader bufr = new BufferedReader(isr);
+        String str;
+        while ((str = bufr.readLine()) != null) {
+            System.out.println(str);
+        }
+        bufr.close();
+        isr.close();
+        in.close();
+		return str;
+	}
+
+
+
+
 
 	/**
 	 * 保存虚拟机
@@ -147,6 +188,7 @@ public class KubeVmController extends BaseController {
 			response.setContentType("application/octet-stream");
 			response.addHeader("Content-Disposition", "attachment; filename=" + new String(file.getBytes("gb2312"),"ISO8859-1"));
 			outputStream.write(bytes);
+
 			outputStream.close();
 		}
 	}
@@ -178,16 +220,18 @@ public class KubeVmController extends BaseController {
 		}
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
+
+
 	/*	Pod pod = KubeClinet.getKubeclinet().pods().inNamespace("class-test-user2")
 				.withName("class-test-user2-0").get();
-		System.out.println(pod);*/
+		System.out.println(pod);
 
 		File tmpDir = new File("C:\\Users\\Administrator\\Documents\\Tencent Files\\576108653\\FileRecv\\MobileFile\\1.jpg");
 		//File tmpDir = Files.createTempDir();
 		Boolean upload = KubeClinet.getKubeclinet().pods().inNamespace("class-test-user2")
 				.withName("class-test-user2-0").file("/home/test.jpg").upload(tmpDir.toPath());
-		System.out.println(upload);
+		System.out.println(upload);*/
 	}
 
 

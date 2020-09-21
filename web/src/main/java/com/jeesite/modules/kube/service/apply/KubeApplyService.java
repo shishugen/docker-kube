@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.jeesite.modules.kube.core.KubeClinet;
+import com.jeesite.modules.kube.core.SSHRemoteCall;
 import com.jeesite.modules.kube.dao.clazz.KubeClassStudentsDao;
 import com.jeesite.modules.kube.entity.clazz.KubeClass;
 import com.jeesite.modules.kube.entity.clazz.KubeClassStudents;
@@ -33,6 +34,8 @@ import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.record.PageBreakRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +55,8 @@ import static java.util.stream.Collectors.groupingBy;
 @Service
 @Transactional(readOnly=true)
 public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
+
+	private static Logger logger = LoggerFactory.getLogger(KubeApplyService.class);
 
 	@Autowired
     private KubeVmLogService kubeVmLogService;
@@ -130,10 +135,11 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 		KubeApply kubeApply = new KubeApply();
 		List<KubeApply> list = dao.findByStartDate(kubeApply);
 		if(list == null || list.size() ==0){
-			System.out.println("无申请预约=====》");
+			logger.info("无申请预约=====》");
 			return;
 		}
-		System.out.println("申请预约=====》"+list.size());
+		logger.info("申请预约=====》{}",list.size());
+
 		list.forEach((apply->{
 			String applyId = apply.getId();
 			String classId = apply.getClassId();
@@ -142,7 +148,7 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 			Integer type = apply.getType();
 			//查找当前课程的镜像
 			List<KubeCourseImages> courseImagesList = this.getImagesByCourseId(courseId);
-			System.out.println("镜像=====》"+courseImagesList.size());
+			logger.info("镜像=====》"+courseImagesList.size());
 			courseImagesList.forEach(image->{
 				 KubeImages images = kubeImagesService.get(image.getImagesId());
 				 String repositoryNam = images.getRepositoryName();
@@ -182,18 +188,24 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 			KubeVm vm = new KubeVm();
 			vm.setApplyId(apply.getId());
 			List<KubeVm> list = kubeVmService.findList(vm);
-			AtomicBoolean flag = new AtomicBoolean(true);
+			//AtomicBoolean flag = new AtomicBoolean(true);
 			list.forEach(kubeVm -> {
+				System.out.println(kubeVm.toString());
 				kubeVmService.delete(kubeVm);
 				System.err.println("放资源==成功");
-				if (flag.get()){
-					if(KubeClinet.dalDeploment(kubeVm.getDeploymentName())){
+				SSHRemoteCall.sshMap.remove(kubeVm.getContainerId());
+				KubeClinet.dalNamespace(kubeVm.getNamespace());
+				KubeClinet.deletePV(kubeVm.getVmName()+"-pv");
+
+
+				/*	if(KubeClinet.dalDeploment(kubeVm.getDeploymentName())){
+
 						System.err.println("放资源服务器资源----==成功");
+							SSHRemoteCall.sshMap.remove(kubeVm.getContainerId());
 						flag.set(false);
 					}else{
 						System.err.println("放资源服务器资源----==失败---");
-					}
-				}
+					}*/
 				/*if(deploymentName == null || namespace == null
 						|| !namespace.equals(kubeVm.getNamespace())
 						|| !deploymentName.equals(kubeVm.getDeploymentName())){
@@ -279,10 +291,10 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 		KubeApply kubeApply = new KubeApply();
 		List<KubeApply> list = dao.findByStartDate(kubeApply);
 		if(list == null || list.size() ==0){
-			System.out.println("无申请预约=====》");
+			logger.info("无申请预约=====》");
 			return;
 		}
-		System.out.println("申请预约=====》"+list.size());
+		logger.info("无申请预约=====》{}",list.size());
 		list.forEach((apply-> {
 			String applyId = apply.getId();
 			String classId = apply.getClassId();
@@ -292,12 +304,12 @@ public class KubeApplyService extends CrudService<KubeApplyDao, KubeApply> {
 
 			//查找当前课程的镜像
 			List<KubeCourseImages> courseImagesList = this.getImagesByCourseId(courseId);
-
+			logger.info("查找当前课程的镜像=====》{}",courseImagesList.size());
 			KubeClassStudents kubeClassStudents = new KubeClassStudents();
 			kubeClassStudents.setApplyId(applyId);
 			kubeClassStudents.setClassId(new KubeClass(classId));
 			List<KubeClassStudents> studentsList = kubeClassStudentsDao.findApplyIdNotBind(kubeClassStudents);
-
+			logger.info("studentsList : {}",studentsList.size());
 			ThreadPool.executorService.submit( new CreateVmThread2(studentsList,courseImagesList,apply,kubeCourse.getCode()));
 
 			//保存日志

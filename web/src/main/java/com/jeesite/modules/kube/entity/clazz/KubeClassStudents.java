@@ -4,6 +4,8 @@
 package com.jeesite.modules.kube.entity.clazz;
 
 import javax.validation.constraints.NotBlank;
+
+import com.jeesite.modules.sys.entity.Role;
 import org.hibernate.validator.constraints.Length;
 import com.jeesite.modules.sys.entity.User;
 import com.jeesite.common.mybatis.annotation.JoinTable;
@@ -32,15 +34,17 @@ import com.jeesite.common.mybatis.mapper.query.QueryType;
 				@Column(name="user_code", label="用户编码", isPK=true),
 				@Column(name="user_name", label="用户名称", isQuery=false),
 				@Column(name="login_code", label="登录名"),
-		}),
-	}, orderBy="a.create_date ASC"
+		})
+	},
+		orderBy="a.create_date ASC"
 )
 public class KubeClassStudents extends DataEntity<KubeClassStudents> {
-	
+
 	private static final long serialVersionUID = 1L;
 	private KubeClass classId;		// 班级ID 父类
 	private User userId;		// 用户ID
 	private String applyId;		// applyIdID
+
 
 	public KubeClassStudents() {
 		this(null);
@@ -77,4 +81,6 @@ public class KubeClassStudents extends DataEntity<KubeClassStudents> {
 	public void setApplyId(String applyId) {
 		this.applyId = applyId;
 	}
+
+
 }

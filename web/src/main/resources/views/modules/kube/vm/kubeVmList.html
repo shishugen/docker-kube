@@ -1,7 +1,11 @@
 <% layout('/layouts/default.html', {title: '虚拟机管理', libs: ['dataGrid']}){ %>
 <div class="main-content">
 
+    <div id="testId">
 
+    </div>
+
+<!--
 	<label>文件上传</label>
 	<div class="form-group">
 		<label class="control-label col-sm-4" title="">
@@ -11,7 +15,7 @@
 		</div>
 		<input type="file" name="fileName1"  id="fileName1"/>
 		<input type="button"  id="sendToUser" value="提交"/>
-	</div>
+	</div>-->
 
 
 	<div class="box box-main">
@@ -137,30 +141,13 @@ $('#dataGrid').dataGrid({
 
 
 $("#sendToUser").on('click',function(){
-    var file1 = $("input[name='fileName1']").val();
-    var id = $("#vmName").val();
-    if (file1 == "" || id == '') {
-        alert("请选择上传的目标文件彧虚拟机 ")
-        return false;
-    }
-    boo1 = true;
-    var type = "file";
-    var formData = new FormData();
-    formData.append(type,$("#fileName1")[0].files[0]);
-    formData.append("id",id);
     $.ajax({
         type : "post",
-        url : "${ctx}/kube/vm/kubeVm/uploadToFile",
-        data : formData,
-        processData : false,
-        contentType : false,
+        url : "${ctx}/kube/vm/kubeVm/testUrl",
         success : function(data){
-            if (data=="error") {
-                alert("文件提交失败!");
-            }else{
-                $("input[name='userUrl']").val(data);
-                alert("文件上传成功!");
-            }}
+                 console.log(data)
+                $("input[id='testId']").val(data);
+
     });
 
 });
